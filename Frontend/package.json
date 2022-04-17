@@ -1,15 +1,20 @@
 {
-  "name": "frontend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "com.zumhub",
+  "private": true,
+  "version": "0.0.0",
   "scripts": {
-    "build-css": "tailwind build src/styles.css -o dist/styles.css"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "Apache-2.0",
   "dependencies": {
-    "tailwindcss": "^3.0.24"
+    "vue": "^3.2.25"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.3.1",
+    "autoprefixer": "^10.4.4",
+    "postcss": "^8.4.12",
+    "tailwindcss": "^3.0.24",
+    "vite": "^2.9.2"
   }
 }
