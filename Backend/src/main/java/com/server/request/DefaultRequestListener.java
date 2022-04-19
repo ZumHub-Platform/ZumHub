@@ -16,6 +16,7 @@
 
 package com.server.request;
 
+import com.google.gson.Gson;
 import com.server.mapping.MappingService;
 import com.server.response.Response;
 import com.server.response.StringResponse;
@@ -30,7 +31,13 @@ public class DefaultRequestListener extends RequestListener {
     @Override
     public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest msg) {
         MappingService mappingService = MappingService.getService();
-        Response<?> mappedResponse = mappingService.route(msg, msg.uri());
+        Response<?> mappedResponse;
+        try {
+            mappedResponse = mappingService.route(msg, msg.uri());
+        } catch (Exception e) {
+            mappedResponse = new StringResponse(new Gson().toJson(e.getMessage()));
+        }
+
         if (mappedResponse == null) {
             ctx.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND));
             return;
@@ -45,7 +52,8 @@ public class DefaultRequestListener extends RequestListener {
             if (mappedResponse.isDone()) {
                 writeResponse(ctx, mappedResponse);
             } else {
-                mappedResponse.getAsyncContent().thenAccept(content -> writeResponse(ctx, mappedResponse));
+                Response<?> finalMappedResponse = mappedResponse;
+                mappedResponse.getAsyncContent().thenAccept(content -> writeResponse(ctx, finalMappedResponse));
             }
         }
     }
@@ -58,6 +66,8 @@ public class DefaultRequestListener extends RequestListener {
             ByteBuf content = Unpooled.copiedBuffer(((StringResponse) mappedResponse).getContent(), CharsetUtil.UTF_8);
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, mappedResponse.getStatus(), content);
             response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
+            response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "*");
+            response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
             response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
         }
 

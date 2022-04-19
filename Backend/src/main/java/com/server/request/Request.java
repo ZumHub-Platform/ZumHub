@@ -5,6 +5,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,34 @@ public class Request {
 
         ByteBuf body = request.content();
         return new Request(requestType, headers, parametersMap, body);
+    }
+
+    public boolean validateRequestHeaders(List<String> headers) {
+        if (this.headers == null) {
+            return false;
+        }
+
+        for (String header : headers) {
+            if (!this.headers.containsKey(header)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean validateRequestParameters(List<String> parameters) {
+        if (this.headers == null) {
+            return false;
+        }
+
+        for (String parameter : parameters) {
+            if (!this.parameters.containsKey(parameter)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public RequestType getRequestType() {

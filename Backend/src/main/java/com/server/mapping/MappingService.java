@@ -26,13 +26,14 @@ public final class MappingService {
 
     private static final MappingService instance = new MappingService();
 
-    private MappingContainer container = new MappingContainer();
+    private final MappingContainer container = new MappingContainer();
 
     public Response<?> route(FullHttpRequest request, String url) {
         QueryStringDecoder decoder = new QueryStringDecoder(url);
         Mapping<?> mapping = container.findMapping(decoder.uri());
 
         System.out.println("Routing: " + decoder.uri());
+        Request req = Request.buildRequest(request);
 
         if (mapping == null) {
             Mapping<?> defaultMapping = container.findMapping("/");
@@ -40,10 +41,20 @@ public final class MappingService {
                 return Response.EMPTY_RESPONSE;
             }
 
-            return defaultMapping.handle(Request.buildRequest(request));
+            if (req.validateRequestHeaders(defaultMapping.getRequiredHeaders()) &&
+                    req.validateRequestParameters(defaultMapping.getRequiredParameters())) {
+                return defaultMapping.handle(Request.buildRequest(request));
+            } else {
+                throw new IllegalArgumentException("Request doesn't match required headers or parameters.");
+            }
         }
 
-        return mapping.handle(Request.buildRequest(request));
+        if (req.validateRequestHeaders(mapping.getRequiredHeaders()) &&
+                req.validateRequestParameters(mapping.getRequiredParameters())) {
+            return mapping.handle(Request.buildRequest(request));
+        } else {
+            throw new IllegalArgumentException("Request doesn't match required headers or parameters.");
+        }
     }
 
     public boolean registerMapping(String path, Mapping<?> mapping) {

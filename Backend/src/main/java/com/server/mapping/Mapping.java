@@ -19,7 +19,52 @@ package com.server.mapping;
 import com.server.request.Request;
 import com.server.response.Response;
 
-public interface Mapping<R> {
+import java.util.ArrayList;
+import java.util.List;
 
-    Response<R> handle(Request request);
+public abstract class Mapping<R> {
+
+    private List<String> requiredHeaders = new ArrayList<>();
+    private List<String> requiredParameters = new ArrayList<>();
+
+    public abstract Response<R> handle(Request request);
+
+    public Mapping<R> setRequiredHeaders(List<String> requiredHeaders) {
+        this.requiredHeaders = requiredHeaders;
+        return this;
+    }
+
+    public Mapping<R> addRequiredHeader(String requiredHeader) {
+        this.requiredHeaders.add(requiredHeader);
+        return this;
+    }
+
+    public Mapping<R> removeRequiredHeader(String requiredHeader) {
+        this.requiredHeaders.remove(requiredHeader);
+        return this;
+    }
+
+    public Mapping<R> setRequiredParameters(List<String> requiredParameters) {
+        this.requiredParameters = requiredParameters;
+        return this;
+    }
+
+    public Mapping<R> addRequiredParameter(String requiredParameter) {
+        this.requiredParameters.add(requiredParameter);
+        return this;
+    }
+
+    public Mapping<R> removeRequiredParameter(String requiredParameter) {
+        this.requiredParameters.remove(requiredParameter);
+        return this;
+    }
+
+    public List<String> getRequiredHeaders() {
+        return requiredHeaders;
+    }
+
+    public List<String> getRequiredParameters() {
+        return requiredParameters;
+    }
 }
+

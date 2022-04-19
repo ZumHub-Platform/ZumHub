@@ -18,7 +18,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 
-public class ClientAuthorizationMapping implements Mapping<String> {
+public class ClientAuthorizationMapping extends Mapping<String> {
 
     public static Gson GSON = new GsonBuilder().create();
 

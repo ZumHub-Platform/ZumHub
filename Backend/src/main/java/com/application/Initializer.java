@@ -12,7 +12,7 @@ public class Initializer {
 
     public static void main(String[] args) {
         HimariServer server = new HimariServer(1048);
-        MappingService.getService().registerMapping("/login", new ClientAuthorizationMapping());
+        MappingService.getService().registerMapping("/login", new ClientAuthorizationMapping().addRequiredHeader("Authorization"));
         try {
             ClientManager.getInstance().addClient("admin@test.com", "admin");
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
