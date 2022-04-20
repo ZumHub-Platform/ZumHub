@@ -23,34 +23,34 @@ import java.util.concurrent.*;
 
 public class Response<T> {
 
-    public static Response<String> EMPTY_RESPONSE = new Response<>("");
+    public static Response<String> EMPTY_RESPONSE = new Response<>(new Content<>("", ContentType.APPLICATION_JSON));
 
-    private CompletableFuture<T> content;
+    private CompletableFuture<Content<T>> content;
     private HttpResponseStatus status = HttpResponseStatus.NO_CONTENT;
 
     public Response() {
         this.content = CompletableFuture.completedFuture(null);
     }
 
-    public Response(@NotNull CompletableFuture<T> content) {
+    public Response(@NotNull CompletableFuture<Content<T>> content) {
         this.content = content;
     }
 
-    public Response(@NotNull T content) {
+    public Response(@NotNull Content<T> content) {
         this.content = CompletableFuture.completedFuture(content);
     }
 
-    public Response<T> setAsyncContent(@NotNull CompletableFuture<T> content) {
+    public Response<T> setAsyncContent(@NotNull CompletableFuture<Content<T>> content) {
         this.content = content;
         return this;
     }
 
-    public Response<T> setContent(@NotNull T content) {
+    public Response<T> setContent(@NotNull Content<T> content) {
         this.content = CompletableFuture.completedFuture(content);
         return this;
     }
 
-    public T getContent() {
+    public Content<T> getContent() {
         try {
             return content.get();
         } catch (InterruptedException | ExecutionException e) {
@@ -59,7 +59,7 @@ public class Response<T> {
         }
     }
 
-    public CompletableFuture<T> getAsyncContent() {
+    public CompletableFuture<Content<T>> getAsyncContent() {
         return content;
     }
 

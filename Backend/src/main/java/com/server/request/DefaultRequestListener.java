@@ -18,6 +18,7 @@ package com.server.request;
 
 import com.google.gson.Gson;
 import com.server.mapping.MappingService;
+import com.server.response.Content;
 import com.server.response.Response;
 import com.server.response.StringResponse;
 import io.netty.buffer.ByteBuf;
@@ -60,15 +61,19 @@ public class DefaultRequestListener extends RequestListener {
 
     private void writeResponse(ChannelHandlerContext ctx, Response<?> mappedResponse) {
         FullHttpResponse response;
-        if (mappedResponse.getContent() == null) {
+        if (mappedResponse.getContent().getContent() == null) {
+            Content<?> content = mappedResponse.getContent();
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, mappedResponse.getStatus());
+            content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
         } else {
-            ByteBuf content = Unpooled.copiedBuffer(((StringResponse) mappedResponse).getContent(), CharsetUtil.UTF_8);
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, mappedResponse.getStatus(), content);
-            response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
-            response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "*");
-            response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
+            Content<?> content = mappedResponse.getContent();
+            ByteBuf contentBuffer = Unpooled.copiedBuffer(mappedResponse.getContent().getContentAsString(), CharsetUtil.UTF_8);
+
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, mappedResponse.getStatus(), contentBuffer);
+
+            response.headers().set(HttpHeaderNames.CONTENT_TYPE, content.getType().getContentType());
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, contentBuffer.readableBytes());
+            content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
         }
 
         ctx.write(response);
