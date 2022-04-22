@@ -1,10 +1,10 @@
 <script>
 //import SHA1 from "crypto-js/sha1";
 import functions from "../../Frontend/src/components/functions.vue";
+import * as EmailValidator from 'email-validator';
 
 //Set the input field to normal form, when are conditions done
 function setNormal(container) {
-  $("#" + container).removeClass("outline-red-500");
   $("#" + container).removeClass("bg-red-100");
   $("#" + container).removeClass("border-red-500");
   $("#" + container).addClass("bg-slate-100");
@@ -15,7 +15,6 @@ function fieldIsNull(container) {
     "error-message",
     "You must fill all required fields."
   );
-  $("#" + container).addClass("outline-red-500");
   $("#" + container).removeClass("bg-slate-100");
   $("#" + container).addClass("bg-red-100");
   $("#" + container).addClass("border-red-500");
@@ -26,7 +25,7 @@ function fieldIsUnderMinimum(container, minimum) {
     "error-message",
     `This field has less than ${minimum} characters`
   );
-  $("#" + container).addClass("outline-red-500");
+  $("#" + container).removeClass("bg-slate-100");
   $("#" + container).addClass("bg-red-100");
   $("#" + container).addClass("border-red-500");
 }
@@ -36,29 +35,23 @@ function fieldIsOverMaximum(container, maximum) {
     "error-message",
     `This field has more than ${maximum} characters`
   );
-  $("#" + container).addClass("outline-red-500");
+  $("#" + container).removeClass("bg-slate-100");
   $("#" + container).addClass("bg-red-100");
   $("#" + container).addClass("border-red-500");
 }
 //Check if password in password repeat field doesn't match
 function passwordDoesntMatch(container) {
   functions.methods.changeText("error-message", "Password doesn't match.");
-  $("#" + container).addClass("outline-red-500");
+  $("#" + container).removeClass("bg-slate-100");
   $("#" + container).addClass("bg-red-100");
   $("#" + container).addClass("border-red-500");
 }
 //Check the email syntax, and mark if it's invalid
 function wrongEmailSyntax(container) {
   functions.methods.changeText("error-message", "Invalid email.");
-  $("#" + container).addClass("outline-red-500");
+  $("#" + container).removeClass("bg-slate-100");
   $("#" + container).addClass("bg-red-100");
   $("#" + container).addClass("border-red-500");
-}
-//Email syntax/format checker
-function validateEmail(mail) {
-  if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
-    return true;
-  }
 }
 //Get session token of user
 function getToken() {
@@ -126,6 +119,9 @@ function showSignup() {
     "auth-container-password-repeat-text",
   ]);
 }
+async function isEmailValid(email) {
+  return EmailValidator.validate(email);
+}
 //Check if all conditions are met for signup form
 async function fieldInSignUpIsFilled() {
   var username = document.getElementById("auth-container-username").value;
@@ -149,7 +145,7 @@ async function fieldInSignUpIsFilled() {
   }
   if (email.length === 0) fieldIsNull("auth-container-email");
   else {
-    if (validateEmail(email) !== true) wrongEmailSyntax("auth-container-email");
+    if (await isEmailValid(email) !== true) wrongEmailSyntax("auth-container-email");
     else setNormal("auth-container-email");
   }
   if (passwordrepeat.length === 0)
@@ -158,6 +154,7 @@ async function fieldInSignUpIsFilled() {
     if (passwordrepeat !== password)
       passwordDoesntMatch("auth-container-password-repeat");
     else setNormal("auth-container-password-repeat");
+    setNormal("auth-container-password");
   }
 
   while (
@@ -168,7 +165,7 @@ async function fieldInSignUpIsFilled() {
     username.length > 4 &&
     username.length < 16 &&
     password.length > 7 &&
-    validateEmail(email) === true &&
+    await isEmailValid(email) === true &&
     passwordrepeat === password
   ) {
     resetInputEffects([
@@ -188,14 +185,14 @@ async function fieldInLoginIsFilled() {
   if (password.length === 0) fieldIsNull("auth-container-password");
   if (email.length === 0) fieldIsNull("auth-container-email");
   else {
-    if (validateEmail(email) !== true) wrongEmailSyntax("auth-container-email");
+    if (await isEmailValid(email) !== true) wrongEmailSyntax("auth-container-email");
     else setNormal("auth-container-email");
   }
 
   while (
     email.length !== 0 &&
     password.length !== 0 &&
-    validateEmail(email) === true
+    await isEmailValid(email) === true
   ) {
     sessionStorage.setItem("token", JSON.stringify(getToken()));
     console.log("token:", JSON.parse(sessionStorage.getItem("token")));
