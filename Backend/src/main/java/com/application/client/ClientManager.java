@@ -14,17 +14,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ClientManager {
 
     private static ClientManager instance;
+    public static String AVATAR = "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";
 
     //Temporary
     private Map<String, ClientCredentials> database = new HashMap<>();
+    //TODO: Replace with database client id
+    private Map<String, String> onlineClients = new HashMap<>();
 
     public ClientManager() {
 
@@ -44,8 +44,10 @@ public class ClientManager {
         }
 
         //TODO: Generate token with auth0
+        ClientToken token = new ClientToken(UUID.randomUUID().toString());
+        onlineClients.put(token.getToken(), mail);
 
-        return new ClientToken(new String(Base64.getEncoder().encode(mail.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+        return token;
     }
 
     public boolean verifyClient(ClientCredentials auth, ClientCredentials credentials) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -64,8 +66,23 @@ public class ClientManager {
         return factory.generateSecret(spec).getEncoded();
     }
 
-    public ClientCredentials findClient(String clientName) {
+    public ClientCredentials findOfflineClient(String clientName) {
         return database.get(clientName);
+    }
+
+    public ClientProfile getClientProfile(ClientToken token) {
+        if (onlineClients.containsKey(token.getToken())) {
+            ClientProfile profile = new ClientProfile();
+            profile.setUsername("Test");
+            profile.setEmail("test@admin.com");
+            profile.setAvatar(AVATAR);
+            profile.setRegistrationDate(0);
+            profile.setLastLoginDate(System.currentTimeMillis());
+            profile.setIdentifier(UUID.randomUUID());
+            return profile;
+        }
+
+        return null;
     }
 
     public void addClient(String mail, String password) throws NoSuchAlgorithmException, InvalidKeySpecException {

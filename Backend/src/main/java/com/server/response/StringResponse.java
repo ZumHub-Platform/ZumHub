@@ -10,20 +10,20 @@ public class StringResponse extends Response<String> {
     }
 
     public StringResponse(String response) {
-        super(response);
+        super(new Content<>(response, ContentType.APPLICATION_JSON));
     }
 
-    public StringResponse(@NotNull CompletableFuture<String> content) {
+    public StringResponse(@NotNull CompletableFuture<Content<String>> content) {
         super(content);
     }
 
     @Override
-    public String getContent() {
+    public Content<String> getContent() {
         return super.getContent();
     }
 
     @Override
-    public CompletableFuture<String> getAsyncContent() {
+    public CompletableFuture<Content<String>> getAsyncContent() {
         return super.getAsyncContent();
     }
 }

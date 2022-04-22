@@ -30,8 +30,11 @@ public final class MappingService {
 
     public Response<?> route(FullHttpRequest request, String url) {
         QueryStringDecoder decoder = new QueryStringDecoder(url);
-        Mapping<?> mapping = container.findMapping(decoder.uri());
+        String route = decoder.path();
 
+        Mapping<?> mapping = container.findMapping(route);
+
+        System.out.println("Mapping: " + route);
         System.out.println("Routing: " + decoder.uri());
         Request req = Request.buildRequest(request);
 

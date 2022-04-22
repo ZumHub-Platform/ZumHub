@@ -11,4 +11,13 @@ public class ClientToken {
     public String getToken() {
         return token;
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof ClientToken) {
+            ClientToken other = (ClientToken) object;
+            return this.token.equals(other.token);
+        }
+        return false;
+    }
 }
