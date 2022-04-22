@@ -16,6 +16,7 @@
 
 package com.server.request;
 
+import com.application.Initializer;
 import com.google.gson.Gson;
 import com.server.mapping.MappingService;
 import com.server.response.Content;
@@ -64,6 +65,8 @@ public class DefaultRequestListener extends RequestListener {
         if (mappedResponse.getContent().getContent() == null) {
             Content<?> content = mappedResponse.getContent();
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, mappedResponse.getStatus());
+            
+            Initializer.getDefaultServer().getEnvironment().getDefaultHeaders().forEach((name, value) -> response.headers().set(name, value));
             content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
         } else {
             Content<?> content = mappedResponse.getContent();
@@ -73,6 +76,8 @@ public class DefaultRequestListener extends RequestListener {
 
             response.headers().set(HttpHeaderNames.CONTENT_TYPE, content.getType().getContentType());
             response.headers().set(HttpHeaderNames.CONTENT_LENGTH, contentBuffer.readableBytes());
+
+            Initializer.getDefaultServer().getEnvironment().getDefaultHeaders().forEach((name, value) -> response.headers().set(name, value));
             content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
         }
 

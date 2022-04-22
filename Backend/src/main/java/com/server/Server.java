@@ -20,11 +20,13 @@ import io.netty.channel.ChannelFuture;
 
 public interface Server {
 
-    short getPort();
-
     void start();
 
     void stop();
 
     ChannelFuture getChannel();
+
+    short getPort();
+
+    Environment getEnvironment();
 }

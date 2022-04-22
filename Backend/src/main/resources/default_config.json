@@ -1,6 +1,0 @@
-{
-  "server": {
-    "port": 1024,
-    "mode": "dev"
-  }
-}

@@ -34,19 +34,14 @@ public class ClientProfileMapping extends Mapping<String> {
                 if (ClientManager.getInstance().getClientProfile(token) == null) {
                     response.setStatus(HttpResponseStatus.UNAUTHORIZED);
 
-                    Content<String> content = new Content<>("", ContentType.APPLICATION_JSON);
-                    content.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-
-                    return content;
+                    return new Content<>("", ContentType.APPLICATION_JSON);
                 }
 
                 response.setStatus(HttpResponseStatus.OK);
 
                 ClientProfile profile = ClientManager.getInstance().getClientProfile(token);
-                Content<String> content = new Content<>(new Gson().toJson(profile), ContentType.APPLICATION_JSON);
-                content.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 
-                return content;
+                return new Content<>(new Gson().toJson(profile), ContentType.APPLICATION_JSON);
             })));
 
             return response;

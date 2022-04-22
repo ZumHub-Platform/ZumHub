@@ -1,20 +1,17 @@
 package com.application.client;
 
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
-import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ClientManager {
 
@@ -49,6 +46,18 @@ public class ClientManager {
 
         return token;
     }
+
+    public boolean createClient(String mail, String password) throws InvalidKeySpecException {
+        if (clientExists(mail)) {
+            return false;
+        }
+
+        ClientCredentials clientAuthorization = new ClientCredentials(mail, password.getBytes(StandardCharsets.UTF_8));
+        database.put(mail, clientAuthorization);
+        return true;
+    }
+
+    //1NAzeKWywMwB0uAl
 
     public boolean verifyClient(ClientCredentials auth, ClientCredentials credentials) throws NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] hash = encryptPassword(new String(auth.getPassword(), CharsetUtil.UTF_8));
@@ -87,6 +96,10 @@ public class ClientManager {
 
     public void addClient(String mail, String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
         database.put(mail, new ClientCredentials(mail, encryptPassword(password)));
+    }
+
+    public boolean clientExists(String mail) {
+        return database.containsKey(mail);
     }
 
     public static ClientManager getInstance() {
