@@ -1,42 +1,44 @@
 package com.application.database;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-
-import java.net.UnknownHostException;
+import com.mongodb.client.MongoClients;
+import dev.morphia.Datastore;
+import dev.morphia.DatastoreImpl;
+import dev.morphia.Morphia;
+import dev.morphia.mapping.MapperOptions;
 
 public class Database {
 
-    private MongoClient client;
+    private final DatabaseClient client;
+    private Datastore database;
 
-    public Database() {
-
+    public Database(DatabaseClient client) {
+        this.client = client;
+        this.database = null;
     }
 
-    public Database(String uri) throws UnknownHostException {
-        client = new MongoClient(new MongoClientURI(uri));
+    public Database(DatabaseClient client, String databaseName) {
+        this.client = client;
+
+        initialize(databaseName);
     }
 
-    public Database connect() throws UnknownHostException {
-        client = new MongoClient("localhost", 27017);
-        return this;
+    public void initialize(String name) {
+        database = Morphia.createDatastore(client.getClient(), name);
     }
 
-    public Database connect(String url) throws UnknownHostException {
-        client = new MongoClient(new MongoClientURI(url));
-        return this;
+    public void mapPackage(String packageName) {
+        database.getMapper().mapPackage(packageName);
     }
 
-    public boolean isConnected() {
-        return client != null && !client.isLocked();
+    public void ensureIndexes() {
+        database.ensureIndexes();
     }
 
-    public Database disconnect() {
-        client.close();
-        return this;
-    }
-
-    public MongoClient getClient() {
+    public DatabaseClient getClient() {
         return client;
+    }
+
+    public Datastore getDatabase() {
+        return database;
     }
 }

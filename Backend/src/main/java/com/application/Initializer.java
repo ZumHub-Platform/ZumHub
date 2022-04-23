@@ -3,6 +3,7 @@ package com.application;
 import com.application.client.ClientManager;
 import com.application.client.response.ClientAuthorizationMapping;
 import com.application.client.response.ClientProfileMapping;
+import com.application.client.response.ClientRegisterMapping;
 import com.application.database.DatabaseManager;
 import com.server.Environment;
 import com.server.HimariServer;
@@ -43,21 +44,20 @@ public class Initializer {
             }
         }
 
+        ClientManager.getInstance().initialize();
+
         defaultServer.getEnvironment().setDefaultHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 
-        MappingService.getService().registerMapping("/login", new ClientAuthorizationMapping().addRequiredHeader("Authorization"));
+        MappingService.getService().findMappings("com.application.client");
+        
+        //MappingService.getService().registerMapping("/login", new ClientAuthorizationMapping().addRequiredHeader("Authorization"));
         MappingService.getService().registerMapping("/client", new ClientProfileMapping().addRequiredHeader("Authorization").addRequiredParameter("username"));
+        MappingService.getService().registerMapping("/register", new ClientRegisterMapping().addRequiredHeader("Authorization"));
 
-        DatabaseManager.getInstance().createDatabase("production", (String) defaultServer.getEnvironment().getPropertyOrDefault("database.production.url", "localhost:27017"));
+        ClientManager.getInstance().getClientCredentialsAuthority().createClientCredentials("admin@test.com", "admin");
 
-        try {
-            ClientManager.getInstance().addClient("admin@test.com", "admin");
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException(e);
-        }
-
-        defaultServer.start();
         logger.info("Application started.");
+        defaultServer.start();
     }
 
     public static HimariServer getDefaultServer() {

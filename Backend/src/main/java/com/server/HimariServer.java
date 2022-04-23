@@ -69,8 +69,8 @@ public class HimariServer implements Server {
     }
 
     @Override
-    public short getPort() {
-        return (short) environment.getPropertyOrDefault("server.port", (short) 1024);
+    public int getPort() {
+        return Integer.parseInt((String) environment.getPropertyOrDefault("server.port", "1048"));
     }
 
     @Override

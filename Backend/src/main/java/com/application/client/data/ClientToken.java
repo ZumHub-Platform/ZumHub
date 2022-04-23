@@ -1,4 +1,4 @@
-package com.application.client;
+package com.application.client.data;
 
 public class ClientToken {
 

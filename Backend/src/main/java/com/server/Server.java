@@ -26,7 +26,7 @@ public interface Server {
 
     ChannelFuture getChannel();
 
-    short getPort();
+    int getPort();
 
     Environment getEnvironment();
 }

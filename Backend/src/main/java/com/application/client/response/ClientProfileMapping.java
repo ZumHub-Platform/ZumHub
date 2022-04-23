@@ -1,8 +1,8 @@
 package com.application.client.response;
 
 import com.application.client.ClientManager;
-import com.application.client.ClientProfile;
-import com.application.client.ClientToken;
+import com.application.client.model.ClientProfile;
+import com.application.client.data.ClientToken;
 import com.google.common.base.Charsets;
 import com.google.common.base.Supplier;
 import com.google.gson.Gson;
@@ -13,7 +13,6 @@ import com.server.response.Content;
 import com.server.response.ContentType;
 import com.server.response.Response;
 import com.server.response.StringResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.util.Base64;
