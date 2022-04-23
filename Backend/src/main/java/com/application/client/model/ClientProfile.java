@@ -1,10 +1,18 @@
 package com.application.client.model;
 
-import java.util.UUID;
+import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Reference;
+import org.bson.types.ObjectId;
 
+import java.util.LinkedList;
+import java.util.List;
+
+@Entity("profiles")
 public class ClientProfile {
 
-    private UUID identifier;
+    @Id
+    private ObjectId id;
     private String username;
     private String email;
 
@@ -12,13 +20,24 @@ public class ClientProfile {
     private long lastLoginDate;
 
     private String avatar;
+    @Reference
+    private List<ClientProfile> friendList = new LinkedList<>();
 
-    public UUID getIdentifier() {
-        return identifier;
+    public ObjectId getIdentifier() {
+        return id;
     }
 
-    public ClientProfile setIdentifier(UUID identifier) {
-        this.identifier = identifier;
+    public ClientProfile setIdentifier(ObjectId identifier) {
+        this.id = identifier;
+        return this;
+    }
+
+    public List<ClientProfile> getFriendList() {
+        return friendList;
+    }
+
+    public ClientProfile setFriendList(List<ClientProfile> friendList) {
+        this.friendList = friendList;
         return this;
     }
 

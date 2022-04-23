@@ -39,23 +39,9 @@ public class ClientManager {
         client.ensureIndexes();
 
         clientCredentialsAuthority = new ClientCredentialsAuthority(client);
+        clientProfileAuthority = new ClientProfileAuthority(client);
 
         logger.info("Client manager initialized.");
-    }
-
-    public ClientProfile getClientProfile(ClientToken token) {
-        if (onlineClients.containsKey(token.getToken())) {
-            ClientProfile profile = new ClientProfile();
-            profile.setUsername("Test");
-            profile.setEmail("test@admin.com");
-            profile.setAvatar(AVATAR);
-            profile.setRegistrationDate(0);
-            profile.setLastLoginDate(System.currentTimeMillis());
-            profile.setIdentifier(UUID.randomUUID());
-            return profile;
-        }
-
-        return null;
     }
 
     public void addOnlineClient(ClientToken token, ObjectId clientId) {

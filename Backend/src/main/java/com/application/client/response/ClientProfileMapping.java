@@ -22,7 +22,7 @@ public class ClientProfileMapping extends Mapping<String> {
 
     @Override
     public Response<String> handle(Request request) {
-        if (request.getRequestType().equals(RequestType.GET)) {
+        /*if (request.getRequestType().equals(RequestType.GET)) {
             String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split("Bearer ")[1]), Charsets.UTF_8);
             ClientToken token = new ClientToken(credentials);
 
@@ -44,7 +44,7 @@ public class ClientProfileMapping extends Mapping<String> {
             })));
 
             return response;
-        }
+        }*/
 
         return Response.EMPTY_RESPONSE;
     }

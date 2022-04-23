@@ -58,6 +58,8 @@ public class ClientCredentialsAuthority {
         ClientCredentials clientCredentials = new ClientCredentials(clientAuthorization);
 
         database.getDatabase().save(clientCredentials);
+
+        ClientManager.getInstance().getClientProfileAuthority().createClientProfile(clientCredentials.getId(), mail);
         return true;
     }
 

@@ -1,10 +1,8 @@
 package com.application;
 
 import com.application.client.ClientManager;
-import com.application.client.response.ClientAuthorizationMapping;
 import com.application.client.response.ClientProfileMapping;
 import com.application.client.response.ClientRegisterMapping;
-import com.application.database.DatabaseManager;
 import com.server.Environment;
 import com.server.HimariServer;
 import com.server.mapping.MappingService;
@@ -15,8 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 
 public class Initializer {
 
@@ -49,10 +45,10 @@ public class Initializer {
         defaultServer.getEnvironment().setDefaultHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 
         MappingService.getService().findMappings("com.application.client");
-        
+
         //MappingService.getService().registerMapping("/login", new ClientAuthorizationMapping().addRequiredHeader("Authorization"));
-        MappingService.getService().registerMapping("/client", new ClientProfileMapping().addRequiredHeader("Authorization").addRequiredParameter("username"));
-        MappingService.getService().registerMapping("/register", new ClientRegisterMapping().addRequiredHeader("Authorization"));
+        //MappingService.getService().registerMapping("/client", new ClientProfileMapping().addRequiredHeader("Authorization").addRequiredParameter("username"));
+        //MappingService.getService().registerMapping("/register", new ClientRegisterMapping().addRequiredHeader("Authorization"));
 
         ClientManager.getInstance().getClientCredentialsAuthority().createClientCredentials("admin@test.com", "admin");
 
