@@ -16,6 +16,7 @@
 
 package com.server.request;
 
+import com.application.Initializer;
 import com.google.gson.Gson;
 import com.server.mapping.MappingService;
 import com.server.response.Content;
@@ -51,19 +52,26 @@ public class DefaultRequestListener extends RequestListener {
 
         if (mappedResponse instanceof StringResponse) {
             if (mappedResponse.isDone()) {
-                writeResponse(ctx, mappedResponse);
+                writeResponse(ctx, RequestType.valueOf(msg.method().name()), mappedResponse);
             } else {
                 Response<?> finalMappedResponse = mappedResponse;
-                mappedResponse.getAsyncContent().thenAccept(content -> writeResponse(ctx, finalMappedResponse));
+                mappedResponse.getAsyncContent().thenAccept(content ->
+                        writeResponse(ctx, RequestType.valueOf(msg.method().name()), finalMappedResponse));
             }
         }
     }
 
-    private void writeResponse(ChannelHandlerContext ctx, Response<?> mappedResponse) {
+    private void writeResponse(ChannelHandlerContext ctx, RequestType requestType, Response<?> mappedResponse) {
         FullHttpResponse response;
         if (mappedResponse.getContent().getContent() == null) {
             Content<?> content = mappedResponse.getContent();
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, mappedResponse.getStatus());
+
+            if (requestType.hasBody()) {
+                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
+            }
+
+            Initializer.getDefaultServer().getEnvironment().getDefaultHeaders().forEach((name, value) -> response.headers().set(name, value));
             content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
         } else {
             Content<?> content = mappedResponse.getContent();
@@ -73,6 +81,8 @@ public class DefaultRequestListener extends RequestListener {
 
             response.headers().set(HttpHeaderNames.CONTENT_TYPE, content.getType().getContentType());
             response.headers().set(HttpHeaderNames.CONTENT_LENGTH, contentBuffer.readableBytes());
+
+            Initializer.getDefaultServer().getEnvironment().getDefaultHeaders().forEach((name, value) -> response.headers().set(name, value));
             content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
         }
 

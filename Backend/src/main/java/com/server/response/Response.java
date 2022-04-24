@@ -23,7 +23,8 @@ import java.util.concurrent.*;
 
 public class Response<T> {
 
-    public static Response<String> EMPTY_RESPONSE = new Response<>(new Content<>("", ContentType.APPLICATION_JSON));
+    public static Response<String> EMPTY_RESPONSE = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
+            setStatus(HttpResponseStatus.BAD_REQUEST);
 
     private CompletableFuture<Content<T>> content;
     private HttpResponseStatus status = HttpResponseStatus.NO_CONTENT;
