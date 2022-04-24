@@ -18,13 +18,23 @@ package com.server.request;
 
 public enum RequestType {
 
-    GET,
-    HEAD,
-    POST,
-    PUT,
-    DELETE,
-    CONNECT,
-    OPTIONS,
-    TRACE,
-    PATCH;
+    GET(true),
+    HEAD(false),
+    POST(true),
+    PUT(false),
+    DELETE(true),
+    CONNECT(true),
+    OPTIONS(true),
+    TRACE(false),
+    PATCH(true);
+
+    private final boolean bodyAllowed;
+
+    RequestType(boolean bodyAllowed) {
+        this.bodyAllowed = bodyAllowed;
+    }
+
+    public boolean hasBody() {
+        return bodyAllowed;
+    }
 }

@@ -2,9 +2,11 @@ package com.application.client;
 
 import com.application.client.data.ClientToken;
 import com.application.client.model.ClientProfile;
+import com.application.client.serialization.ObjectIdSerialization;
 import com.google.common.base.Charsets;
 import com.google.common.base.Supplier;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.server.mapping.annotation.Controller;
 import com.server.mapping.annotation.Mapping;
 import com.server.request.Request;
@@ -15,6 +17,7 @@ import com.server.response.Response;
 import com.server.response.StringResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.bson.types.ObjectId;
 
 import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
@@ -22,7 +25,9 @@ import java.util.concurrent.CompletableFuture;
 @Controller
 public class ClientController {
 
-    @Mapping(value = "/login", method = RequestType.HEAD)
+    public static Gson CLIENT_PROFILE = new GsonBuilder().registerTypeAdapter(ObjectId.class, new ObjectIdSerialization()).create();
+
+    @Mapping(value = "/login", method = RequestType.GET)
     public Response<String> clientAuthorizationRequest(Request request) {
         String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split("Basic ")[1]), Charsets.UTF_8);
         String mail = credentials.split(":")[0];
@@ -42,13 +47,15 @@ public class ClientController {
                 response.setStatus(HttpResponseStatus.OK);
 
                 ClientToken token = ClientManager.getInstance().getClientCredentialsAuthority().authorizeClientCredentials(mail, password);
-                Content<String> content = new Content<>(null, ContentType.APPLICATION_JSON);
-
                 if (token == null) {
                     response.setStatus(HttpResponseStatus.UNAUTHORIZED);
-                } else {
-                    content.setHeader(HttpHeaderNames.AUTHORIZATION, "Basic " + Base64.getEncoder().encodeToString((token.getToken()).getBytes(Charsets.UTF_8)));
+                    return new Content<>(null, ContentType.APPLICATION_JSON);
                 }
+
+                ClientProfile profile = ClientManager.getInstance().getClientProfileAuthority().searchClientProfile(token.getId());
+                Content<String> content = new Content<>(CLIENT_PROFILE.toJson(profile), ContentType.APPLICATION_JSON);
+
+                content.setHeader(HttpHeaderNames.AUTHORIZATION, "Basic " + Base64.getEncoder().encodeToString((token.getToken()).getBytes(Charsets.UTF_8)));
 
                 return content;
             } catch (RuntimeException e) {
@@ -94,7 +101,7 @@ public class ClientController {
     @Mapping(value = "/profile", method = RequestType.GET)
     public Response<String> clientProfileRequest(Request request) {
         String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split("Bearer ")[1]), Charsets.UTF_8);
-        ClientToken token = new ClientToken(credentials);
+        ClientToken token = new ClientToken(null, credentials);
 
         StringResponse response = new StringResponse();
         response.setStatus(HttpResponseStatus.REQUEST_TIMEOUT);

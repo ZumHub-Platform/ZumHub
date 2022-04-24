@@ -42,7 +42,7 @@ public class ClientCredentialsAuthority {
         }
 
         //TODO: Generate token with auth0
-        ClientToken token = new ClientToken(UUID.randomUUID().toString());
+        ClientToken token = new ClientToken(clientAuthorization.getId(), UUID.randomUUID().toString());
         ClientManager.getInstance().addOnlineClient(token, clientAuthorization.getId());
 
         return token;
