@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100&display=swap');
+@import url('https://cdn.skypack.dev/tailwind-scrollbar');
 
 @tailwind base;
 @tailwind components;

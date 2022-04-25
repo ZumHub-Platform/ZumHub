@@ -16,13 +16,16 @@
     "email-deep-validator": "^3.3.0",
     "email-validator": "^2.0.4",
     "jquery": "^3.6.0",
-    "vue": "^3.2.33"
+    "jquery.ns-autogrow": "^1.1.6",
+    "vue": "^3.2.33",
+    "vue-router": "^4.0.14"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.1",
     "autoprefixer": "^10.4.4",
     "postcss": "^8.4.12",
     "tailwindcss": "^3.0.24",
+    "tailwindcss-scrollbar": "^0.1.0",
     "vite": "^2.9.5"
   }
 }
