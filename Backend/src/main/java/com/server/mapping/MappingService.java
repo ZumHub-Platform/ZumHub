@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class MappingService {
@@ -119,6 +120,11 @@ public final class MappingService {
                         }
                     }
                 };
+
+                mapping.setRequiredParameters(Arrays.stream(method.getAnnotation(com.server.mapping.annotation.Mapping.class).parameters())
+                        .collect(Collectors.toList()));
+                mapping.setRequiredHeaders(Arrays.stream(method.getAnnotation(com.server.mapping.annotation.Mapping.class).headers())
+                        .collect(Collectors.toList()));
 
                 registerMapping(clazz.getAnnotation(Controller.class).defaultPath().length() == 0 ?
                         method.getAnnotation(com.server.mapping.annotation.Mapping.class).value() :

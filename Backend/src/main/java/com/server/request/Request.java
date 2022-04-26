@@ -74,8 +74,24 @@ public class Request {
         return headers;
     }
 
+    public String getHeader(String header) {
+        return headers.get(header);
+    }
+
+    public boolean hasHeader(String header) {
+        return headers.containsKey(header);
+    }
+
     public Map<String, String> getParameters() {
         return parameters;
+    }
+
+    public String getParameter(String parameter) {
+        return parameters.get(parameter);
+    }
+
+    public boolean hasParameter(String parameter) {
+        return parameters.containsKey(parameter);
     }
 
     public ByteBuf getBody() {

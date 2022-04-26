@@ -26,8 +26,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class HimariServer implements Server {
 
+    private final Environment environment;
     private ChannelFuture channelFuture;
-    private Environment environment;
 
     public HimariServer(Environment environment) {
         this.environment = environment;
@@ -70,7 +70,7 @@ public class HimariServer implements Server {
 
     @Override
     public int getPort() {
-        return Integer.parseInt((String) environment.getPropertyOrDefault("server.port", "1048"));
+        return Integer.parseInt(environment.getPropertyOrDefault("server.port", "1048"));
     }
 
     @Override

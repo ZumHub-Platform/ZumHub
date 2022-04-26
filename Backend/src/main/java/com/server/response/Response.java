@@ -25,6 +25,14 @@ public class Response<T> {
 
     public static Response<String> EMPTY_RESPONSE = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
             setStatus(HttpResponseStatus.BAD_REQUEST);
+    public static Response<String> UNAUTHORIZED = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
+            setStatus(HttpResponseStatus.UNAUTHORIZED);
+    public static Response<String> FORBIDDEN = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
+            setStatus(HttpResponseStatus.FORBIDDEN);
+    public static Response<String> NOT_FOUND = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
+            setStatus(HttpResponseStatus.NOT_FOUND);
+    public static Response<String> INTERNAL_SERVER_ERROR = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
+            setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 
     private CompletableFuture<Content<T>> content;
     private HttpResponseStatus status = HttpResponseStatus.NO_CONTENT;

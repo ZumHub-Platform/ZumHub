@@ -1,6 +1,5 @@
 package com.server;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.util.AsciiString;
 
 import java.io.IOException;
@@ -29,12 +28,12 @@ public class Environment {
         }
     }
 
-    public Object getProperty(String key) {
-        return properties.get(key);
+    public <T> T getProperty(String key) {
+        return (T) properties.get(key);
     }
 
-    public Object getPropertyOrDefault(String key, Object defaultValue) {
-        return properties.getOrDefault(key, defaultValue);
+    public <T> T getPropertyOrDefault(String key, T defaultValue) {
+        return (T) properties.getOrDefault(key, defaultValue);
     }
 
     public Environment setDefaultHeader(AsciiString name, String value) {

@@ -12,11 +12,11 @@ import java.util.Base64;
 @Entity(value = "credentials", useDiscriminator = false)
 public class ClientCredentials {
 
+    @Indexed(options = @IndexOptions(unique = true))
+    private final String mail;
+    private final String password;
     @Id
     private ObjectId id;
-    @Indexed(options = @IndexOptions(unique = true))
-    private String mail;
-    private String password;
 
     public ClientCredentials(Credentials credentials) {
         this.mail = credentials.getMail();

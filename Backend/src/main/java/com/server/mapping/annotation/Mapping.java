@@ -13,4 +13,8 @@ public @interface Mapping {
     String value() default "/";
 
     RequestType method() default RequestType.GET;
+
+    String[] parameters() default {};
+
+    String[] headers() default {};
 }

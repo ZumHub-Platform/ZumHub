@@ -9,15 +9,15 @@ public class PasswordHandler {
 
     public static String hashPassword(String password) {
         return Hash.password(password.toCharArray())
-                .pepper(((String) Initializer.getDefaultServer()
-                        .getEnvironment().getPropertyOrDefault("security.password.pepper", "pepper")).toCharArray())
+                .pepper(Initializer.getDefaultServer()
+                        .getEnvironment().getPropertyOrDefault("security.password.pepper", "pepper").toCharArray())
                 .algorithm(Type.PBKDF2_SHA512).saltLength(32).create();
     }
 
     public static boolean checkPassword(String password, String hashedPassword) throws InvalidHashException {
         return Hash.password(password.toCharArray())
-                .pepper(((String) Initializer.getDefaultServer()
-                        .getEnvironment().getPropertyOrDefault("security.password.pepper", "pepper")).toCharArray())
+                .pepper(Initializer.getDefaultServer()
+                        .getEnvironment().getPropertyOrDefault("security.password.pepper", "pepper").toCharArray())
                 .algorithm(Type.PBKDF2_SHA512).saltLength(32).verify(hashedPassword);
     }
 }
