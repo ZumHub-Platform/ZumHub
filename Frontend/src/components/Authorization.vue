@@ -60,13 +60,13 @@ export default {
       while (this.validEmail(email) && this.validPassword(password)) {
         functions.methods.show(["login-success"]);
         functions.methods.hide(["auth-window"]);
-        getToken()
+        /* getToken()
           .then(function (response) {
             console.log("Data loaded:", response);
           })
           .catch(function (err) {
             console.log(err);
-          });
+          }); */
 
         auth.methods.setNormal(["email", "password"]);
         functions.methods.changeText("error-message", "");
