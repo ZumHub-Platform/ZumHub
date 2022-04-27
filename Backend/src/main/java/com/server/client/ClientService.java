@@ -23,12 +23,16 @@ public final class ClientService extends Service {
 
     public static ClientService singleton;
 
-    private Server server;
+    private final Server server;
 
     public ClientService(Server server) {
         singleton = this;
 
         this.server = server;
+    }
+
+    public static ClientService getInstance() {
+        return singleton;
     }
 
     public void handleIncomingClient() {
@@ -37,9 +41,5 @@ public final class ClientService extends Service {
 
     public Server getServer() {
         return server;
-    }
-
-    public static ClientService getInstance() {
-        return singleton;
     }
 }

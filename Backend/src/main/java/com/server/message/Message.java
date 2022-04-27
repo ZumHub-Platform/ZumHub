@@ -23,5 +23,5 @@ public interface Message {
      *
      * @return the content of the message.
      */
-    public String getContent();
+    String getContent();
 }

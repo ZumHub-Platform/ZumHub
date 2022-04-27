@@ -16,16 +16,33 @@
 
 package com.server.mapping;
 
+import com.google.common.reflect.ClassPath;
+import com.reflection.ClassMapper;
+import com.reflection.MethodMapper;
+import com.server.mapping.annotation.Controller;
 import com.server.request.Request;
 import com.server.response.Response;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class MappingService {
 
     private static final MappingService instance = new MappingService();
 
+    private final Logger logger = LoggerFactory.getLogger(MappingService.class);
     private final MappingContainer container = new MappingContainer();
 
     public Response<?> route(FullHttpRequest request, String url) {
@@ -66,7 +83,55 @@ public final class MappingService {
         }
 
         container.addMapping(path, mapping);
+
+        logger.info("Registered mapping: " + path);
         return true;
+    }
+
+    public void findMappings(String packageName) {
+        Class<?>[] classes = new ClassMapper(packageName).addRequiredAnnotation(Controller.class).mapClasses();
+        if (classes.length == 0) {
+            return;
+        }
+
+        for (Class<?> clazz : classes) {
+            Method[] methods = new MethodMapper(clazz)
+                    .addRequiredAnnotation(com.server.mapping.annotation.Mapping.class)
+                    .addRequiredParameterType(Request.class)
+                    .setReturnType(Response.class)
+                    .mapMethods();
+
+            for (Method method : methods) {
+                Mapping<?> mapping = new Mapping<String>() {
+
+                    @Override
+                    public Response<String> handle(Request request) {
+                        if (request.getRequestType() != method.getAnnotation(com.server.mapping.annotation.Mapping.class).method()) {
+                            return Response.EMPTY_RESPONSE;
+                        }
+
+                        try {
+                            Response<?> response = method.invoke(clazz.getDeclaredConstructor().newInstance(), request) == null ?
+                                    Response.EMPTY_RESPONSE : (Response<?>) method.invoke(clazz.getDeclaredConstructor().newInstance(), request);
+                            return (Response<String>) response;
+                        } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
+                                 NoSuchMethodException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                };
+
+                mapping.setRequiredParameters(Arrays.stream(method.getAnnotation(com.server.mapping.annotation.Mapping.class).parameters())
+                        .collect(Collectors.toList()));
+                mapping.setRequiredHeaders(Arrays.stream(method.getAnnotation(com.server.mapping.annotation.Mapping.class).headers())
+                        .collect(Collectors.toList()));
+
+                registerMapping(clazz.getAnnotation(Controller.class).defaultPath().length() == 0 ?
+                        method.getAnnotation(com.server.mapping.annotation.Mapping.class).value() :
+                        clazz.getAnnotation(Controller.class).defaultPath() +
+                                method.getAnnotation(com.server.mapping.annotation.Mapping.class).value(), mapping);
+            }
+        }
     }
 
     public MappingContainer getContainer() {

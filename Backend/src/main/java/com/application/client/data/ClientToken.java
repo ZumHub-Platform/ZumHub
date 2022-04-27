@@ -1,14 +1,23 @@
-package com.application.client;
+package com.application.client.data;
+
+import org.bson.types.ObjectId;
+import org.jetbrains.annotations.NotNull;
 
 public class ClientToken {
 
+    private final ObjectId id;
     private final String token;
 
-    public ClientToken(String token) {
+    public ClientToken(@NotNull ObjectId id, @NotNull String token) {
+        this.id = id;
         this.token = token;
     }
 
-    public String getToken() {
+    public @NotNull ObjectId getId() {
+        return id;
+    }
+
+    public @NotNull String getToken() {
         return token;
     }
 

@@ -26,22 +26,11 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class HimariServer implements Server {
 
-    private final short port;
-
+    private final Environment environment;
     private ChannelFuture channelFuture;
 
-    public HimariServer(int port) {
-        this.port = (short) port;
-    }
-
-    public static void main(String[] arguments) {
-        HimariServer server = new HimariServer(1048);
-        server.start();
-    }
-
-    @Override
-    public short getPort() {
-        return port;
+    public HimariServer(Environment environment) {
+        this.environment = environment;
     }
 
     @Override
@@ -58,7 +47,7 @@ public class HimariServer implements Server {
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            channelFuture = httpBootstrap.bind(port).sync();
+            channelFuture = httpBootstrap.bind(getPort()).sync();
 
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException exception) {
@@ -77,5 +66,15 @@ public class HimariServer implements Server {
     @Override
     public ChannelFuture getChannel() {
         return null;
+    }
+
+    @Override
+    public int getPort() {
+        return Integer.parseInt(environment.getPropertyOrDefault("server.port", "1048"));
+    }
+
+    @Override
+    public Environment getEnvironment() {
+        return environment;
     }
 }
