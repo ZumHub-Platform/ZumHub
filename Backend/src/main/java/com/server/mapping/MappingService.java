@@ -16,27 +16,20 @@
 
 package com.server.mapping;
 
-import com.google.common.reflect.ClassPath;
 import com.reflection.ClassMapper;
 import com.reflection.MethodMapper;
 import com.server.mapping.annotation.Controller;
 import com.server.request.Request;
 import com.server.response.Response;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class MappingService {
 
@@ -45,14 +38,16 @@ public final class MappingService {
     private final Logger logger = LoggerFactory.getLogger(MappingService.class);
     private final MappingContainer container = new MappingContainer();
 
+    public static MappingService getService() {
+        return instance;
+    }
+
     public Response<?> route(FullHttpRequest request, String url) {
         QueryStringDecoder decoder = new QueryStringDecoder(url);
         String route = decoder.path();
 
         Mapping<?> mapping = container.findMapping(route);
 
-        System.out.println("Mapping: " + route);
-        System.out.println("Routing: " + decoder.uri());
         Request req = Request.buildRequest(request);
 
         if (mapping == null) {
@@ -111,8 +106,10 @@ public final class MappingService {
                         }
 
                         try {
-                            Response<?> response = method.invoke(clazz.getDeclaredConstructor().newInstance(), request) == null ?
-                                    Response.EMPTY_RESPONSE : (Response<?>) method.invoke(clazz.getDeclaredConstructor().newInstance(), request);
+                            Response<?> response = method.invoke(clazz.getDeclaredConstructor().newInstance(),
+                                    request) == null ?
+                                    Response.EMPTY_RESPONSE :
+                                    (Response<?>) method.invoke(clazz.getDeclaredConstructor().newInstance(), request);
                             return (Response<String>) response;
                         } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
                                  NoSuchMethodException e) {
@@ -136,9 +133,5 @@ public final class MappingService {
 
     public MappingContainer getContainer() {
         return container;
-    }
-
-    public static MappingService getService() {
-        return instance;
     }
 }

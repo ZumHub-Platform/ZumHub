@@ -25,11 +25,13 @@ import java.util.concurrent.CompletableFuture;
 @Controller
 public class ClientController {
 
-    public static Gson CLIENT_PROFILE = new GsonBuilder().registerTypeAdapter(ObjectId.class, new ObjectIdSerialization()).create();
+    public static Gson CLIENT_PROFILE = new GsonBuilder().registerTypeAdapter(ObjectId.class,
+            new ObjectIdSerialization()).create();
 
     @Mapping(value = "/login", method = RequestType.GET)
     public Response<String> clientAuthorizationRequest(Request request) {
-        String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split("Basic ")[1]), Charsets.UTF_8);
+        String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split(
+                "Basic ")[1]), Charsets.UTF_8);
         String mail = credentials.split(":")[0];
         String password = credentials.split(":")[1];
 
@@ -46,16 +48,21 @@ public class ClientController {
             try {
                 response.setStatus(HttpResponseStatus.OK);
 
-                ClientToken token = ClientManager.getInstance().getClientCredentialsAuthority().authorizeClientCredentials(mail, password);
+                ClientToken token =
+                        ClientManager.getInstance().getClientCredentialsAuthority().authorizeClientCredentials(mail,
+                                password);
                 if (token == null) {
                     response.setStatus(HttpResponseStatus.UNAUTHORIZED);
                     return new Content<>(null, ContentType.APPLICATION_JSON);
                 }
 
-                ClientProfile profile = ClientManager.getInstance().getClientProfileAuthority().searchClientProfile(token.getId());
+                ClientProfile profile =
+                        ClientManager.getInstance().getClientProfileAuthority().searchClientProfile(token.getId());
                 Content<String> content = new Content<>(CLIENT_PROFILE.toJson(profile), ContentType.APPLICATION_JSON);
 
-                content.setHeader(HttpHeaderNames.AUTHORIZATION, "Basic " + Base64.getEncoder().encodeToString((token.getToken()).getBytes(Charsets.UTF_8)));
+                content.setHeader(HttpHeaderNames.AUTHORIZATION,
+                        "Bearer " + Base64.getEncoder().encodeToString((token.getToken()).getBytes(Charsets.UTF_8)));
+                content.setHeader(HttpHeaderNames.CACHE_CONTROL, "private, max-age=86400");
 
                 return content;
             } catch (RuntimeException e) {
@@ -70,7 +77,8 @@ public class ClientController {
 
     @Mapping(value = "/register", method = RequestType.HEAD)
     public Response<String> clientRegisterRequest(Request request) {
-        String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split("Basic ")[1]), Charsets.UTF_8);
+        String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split(
+                "Basic ")[1]), Charsets.UTF_8);
         String mail = credentials.split(":")[0];
         String password = credentials.split(":")[1];
 
@@ -81,7 +89,8 @@ public class ClientController {
             try {
                 response.setStatus(HttpResponseStatus.OK);
 
-                if (ClientManager.getInstance().getClientCredentialsAuthority().createClientCredentials(mail, password)) {
+                if (ClientManager.getInstance().getClientCredentialsAuthority().createClientCredentials(mail,
+                        password)) {
                     response.setStatus(HttpResponseStatus.OK);
                 } else {
                     response.setStatus(HttpResponseStatus.PRECONDITION_FAILED);
@@ -100,7 +109,8 @@ public class ClientController {
 
     @Mapping(value = "/profile", method = RequestType.GET)
     public Response<String> clientProfileRequest(Request request) {
-        String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split("Bearer ")[1]), Charsets.UTF_8);
+        String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split(
+                "Bearer ")[1]), Charsets.UTF_8);
         ClientToken token = new ClientToken(null, credentials);
 
         StringResponse response = new StringResponse();
@@ -115,7 +125,8 @@ public class ClientController {
 
             response.setStatus(HttpResponseStatus.OK);
 
-            ClientProfile profile = ClientManager.getInstance().getClientProfileAuthority().searchClientProfile(token.toString());
+            ClientProfile profile = ClientManager.getInstance().getClientProfileAuthority().searchClientProfile(token
+            .toString());
 
             return new Content<>(new Gson().toJson(profile), ContentType.APPLICATION_JSON);
         })));*/

@@ -19,19 +19,23 @@ package com.server.response;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class Response<T> {
 
     public static Response<String> EMPTY_RESPONSE = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
             setStatus(HttpResponseStatus.BAD_REQUEST);
+    public static Response<String> OK_RESPONSE = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
+            setStatus(HttpResponseStatus.OK);
     public static Response<String> UNAUTHORIZED = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
             setStatus(HttpResponseStatus.UNAUTHORIZED);
     public static Response<String> FORBIDDEN = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
             setStatus(HttpResponseStatus.FORBIDDEN);
     public static Response<String> NOT_FOUND = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
             setStatus(HttpResponseStatus.NOT_FOUND);
-    public static Response<String> INTERNAL_SERVER_ERROR = new Response<>(new Content<>("", ContentType.APPLICATION_JSON)).
+    public static Response<String> INTERNAL_SERVER_ERROR = new Response<>(new Content<>("",
+            ContentType.APPLICATION_JSON)).
             setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 
     private CompletableFuture<Content<T>> content;
@@ -49,16 +53,6 @@ public class Response<T> {
         this.content = CompletableFuture.completedFuture(content);
     }
 
-    public Response<T> setAsyncContent(@NotNull CompletableFuture<Content<T>> content) {
-        this.content = content;
-        return this;
-    }
-
-    public Response<T> setContent(@NotNull Content<T> content) {
-        this.content = CompletableFuture.completedFuture(content);
-        return this;
-    }
-
     public Content<T> getContent() {
         try {
             return content.get();
@@ -68,8 +62,18 @@ public class Response<T> {
         }
     }
 
+    public Response<T> setContent(@NotNull Content<T> content) {
+        this.content = CompletableFuture.completedFuture(content);
+        return this;
+    }
+
     public CompletableFuture<Content<T>> getAsyncContent() {
         return content;
+    }
+
+    public Response<T> setAsyncContent(@NotNull CompletableFuture<Content<T>> content) {
+        this.content = content;
+        return this;
     }
 
     public HttpResponseStatus getStatus() {

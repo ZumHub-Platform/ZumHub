@@ -29,6 +29,14 @@ public final class EventService extends Service {
     private final Logger logger = Logger.getLogger("Event-Service");
     private final EventContainer container = new EventContainer();
 
+    public static EventService getInstance() {
+        if (singleton == null) {
+            singleton = new EventService();
+        }
+
+        return singleton;
+    }
+
     public void handleEvent(Event event) {
         if (!container.isEvent(event.getClass())) {
             logger.log(Level.WARNING, "Event can not be handle because there are no registered handler's.");
@@ -52,13 +60,5 @@ public final class EventService extends Service {
 
     public EventContainer getContainer() {
         return container;
-    }
-
-    public static EventService getInstance() {
-        if (singleton == null) {
-            singleton = new EventService();
-        }
-
-        return singleton;
     }
 }

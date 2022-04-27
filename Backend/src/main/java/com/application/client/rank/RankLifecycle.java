@@ -4,6 +4,7 @@ import com.application.Initializer;
 import com.application.database.Database;
 import com.application.lifecycle.Lifecycle;
 import com.google.gson.Gson;
+import com.utilities.DataStorage;
 import dev.morphia.query.Query;
 
 import java.io.File;
@@ -17,18 +18,18 @@ import java.util.stream.Collectors;
 
 public class RankLifecycle extends Lifecycle {
 
-    private boolean database = false;
+    private DataStorage storage = DataStorage.FILE;
 
     @Override
     public void start() {
         getLogger().info("Starting rank lifecycle...");
 
-        database = Boolean.parseBoolean(Initializer.getDefaultServer()
-                .getEnvironment().getPropertyOrDefault("environment.rank.storage", "false"));
+        storage = DataStorage.valueOf(Initializer.getDefaultServer()
+                .getEnvironment().getPropertyOrDefault("environment.rank.storage", "FILE"));
 
         List<Rank> loadedRanks;
 
-        if (database) {
+        if (storage.equals(DataStorage.DATABASE)) {
             loadedRanks = loadRanksFromDatabase();
         } else {
             loadedRanks = loadRanksFromFile();
@@ -39,7 +40,7 @@ public class RankLifecycle extends Lifecycle {
         }
 
         RankManager.getInstance().setRanks(loadedRanks);
-        getLogger().info("Rank lifecycle started. [{}] ranks loaded.", loadedRanks.size());
+        getLogger().info("Rank lifecycle started. {} ranks loaded.", loadedRanks.size());
     }
 
     private List<Rank> loadRanksFromDatabase() {
@@ -70,7 +71,7 @@ public class RankLifecycle extends Lifecycle {
     }
 
     public void saveRanks() {
-        if (database) {
+        if (storage.equals(DataStorage.DATABASE)) {
             saveRanksToDatabase();
         } else {
             saveRanksToFile();
@@ -89,7 +90,9 @@ public class RankLifecycle extends Lifecycle {
     public void saveRanksToFile() {
         getLogger().info("Saving ranks to file...");
         String path = Initializer.getDefaultServer().getEnvironment()
-                .getPropertyOrDefault("environment.rank.path", "configuration/rank_configuration.json");
+                .getPropertyOrDefault("environment.rank.path",
+                        Initializer.getDefaultServer().getEnvironment().getHomeDirectory().getAbsolutePath() +
+                                "/configuration/rank_configuration.json");
 
         File rankConfigurationFile = new File(path);
         if (!rankConfigurationFile.exists()) {

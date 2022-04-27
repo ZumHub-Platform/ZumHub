@@ -1,7 +1,10 @@
 package com.server;
 
+import com.application.Initializer;
+import com.utilities.FileUtilities;
 import io.netty.util.AsciiString;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -12,6 +15,7 @@ public class Environment {
 
     private final Properties properties = new Properties();
     private final Map<AsciiString, String> defaultHeaders = new HashMap<>();
+    private File homeDirectory;
 
     public Environment() {
     }
@@ -21,6 +25,8 @@ public class Environment {
     }
 
     public void initialize(InputStream propertiesStream) {
+        homeDirectory = FileUtilities.getJarDirectory(Initializer.class);
+        
         try {
             properties.load(propertiesStream);
         } catch (IOException e) {
@@ -51,5 +57,9 @@ public class Environment {
 
     public Map<AsciiString, String> getDefaultHeaders() {
         return defaultHeaders;
+    }
+
+    public File getHomeDirectory() {
+        return homeDirectory;
     }
 }
