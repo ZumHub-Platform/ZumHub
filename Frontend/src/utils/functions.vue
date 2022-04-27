@@ -19,6 +19,10 @@ export default {
     changeText(container, value) {
       document.getElementById(container).innerText = value;
     },
+    changeTextAndValue(container, value) {
+      document.getElementById(container).innerText = value;
+      document.getElementById(container).value = value;
+    },
     resetAnimation(container) {
       var el = document.getElementById(container);
       el.style.animation = "none";

@@ -761,6 +761,7 @@ subtitle
               id="chat-bar-container"
               class="flex flex-col h-24 rounded-3xl bg-slate-800 mx-4 mb-12"
             >
+              <h3 id="totalwords" class="right-8 bottom-24 absolute text-xl text-slate-500"></h3>
               <textarea
                 maxlength="1000"
                 placeholder="Start typing..."
@@ -784,10 +785,6 @@ subtitle
                 "
               ></textarea>
               <hr class="h-0.5 mb-1 bg-slate-500 border-none" />
-              <h3
-                id="totalwords"
-                class="right-2 top-5 absolute text-xl text-slate-500"
-              ></h3>
               <div
                 id="chat-effects-bar"
                 class="
