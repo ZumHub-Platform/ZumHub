@@ -6,44 +6,6 @@ import * as EmailValidator from "email-validator";
 let toNormalize = ["email", "password", "username", "password-repeat"];
 let ac = "auth-container-";
 
-//Set the input field to normal form, when are conditions done
-function setNormal(container) {
-  functions.methods.removeFromClassList([container], "warning");
-}
-//Show which input field is empty, and needs to be filled
-function fieldIsNull(container) {
-  functions.methods.changeText(
-    "error-message",
-    "You must fill all required fields."
-  );
-  functions.methods.addToClassList([container], "warning");
-}
-//Check if the input field isn't below the conditions
-function fieldIsUnderMinimum(container, minimum) {
-  functions.methods.changeText(
-    "error-message",
-    `This field has less than ${minimum} characters`
-  );
-  functions.methods.addToClassList([container], "warning");
-}
-//Check if the input field isn't over the conditions
-function fieldIsOverMaximum(container, maximum) {
-  functions.methods.changeText(
-    "error-message",
-    `This field has more than ${maximum} characters`
-  );
-  functions.methods.addToClassList([container], "warning");
-}
-//Check if password in password repeat field doesn't match
-function passwordDoesntMatch(container) {
-  functions.methods.changeText("error-message", "Password doesn't match.");
-  functions.methods.addToClassList([container], "warning");
-}
-//Check the email syntax, and mark if it's invalid
-function wrongEmailSyntax(container) {
-  functions.methods.changeText("error-message", "Invalid email.");
-  functions.methods.addToClassList([container], "warning");
-}
 //Get session token of user
 function getToken() {
   var username = "admin@test.com";
@@ -52,10 +14,10 @@ function getToken() {
   $.ajax({
     type: "GET",
     url: "http://localhost:1048/login",
-    dataType: "json",
+    dataType: "jsonp",
     async: false,
     headers: {
-      Authorization: "Basic " + btoa(username + ":" + password),
+      Authorization: $`Bearer YWRtaW5AdGVzdC5jb20=`,
     },
     success: function (data) {
       result = data;
@@ -66,190 +28,160 @@ function getToken() {
   });
   return result;
 }
-//Reset all input fields to normal look, when all conditions are met
-function resetInputEffects(container) {
-  for (var i = 0; i < container.length; i++) {
-    document.getElementById("error-message").innerText = ``;
-    functions.methods.removeFromClassList([container[i]], "warning");
-  }
-}
-//Show login box and hide signup box
-function showLogin() {
-  let finalContainers = [];
-  for (var i = 0; i < toNormalize.length; i++) {
-    finalContainers.push(ac + toNormalize[i]);
-  }
-
-  auth.methods.setActive("login-button", "signup-button");
-
-  functions.methods.resetAnimation("auth-container-inputs");
-
-  functions.methods.changeValue("auth-button", "Login");
-  functions.methods.changeText("auth-button", "Login");
-
-  functions.methods.hide([
-    "auth-container-username",
-    "auth-container-username-text",
-    "auth-container-password-repeat",
-    "auth-container-password-repeat-text",
-  ]);
-  functions.methods.show(["auth-container-email", "auth-container-email-text"]);
-
-  functions.methods.addToClassList(
-    ["auth-container", "auth-container-window"],
-    "add"
-  );
-
-  functions.methods.changeText("error-message", "");
-  auth.methods.setActive("login-button", "signup-button");
-  functions.methods.shrink(["auth-container", "auth-container-window"], "add");
-  functions.methods.extend(
-    ["auth-container", "auth-container-window"],
-    "remove"
-  );
-  for (var i = 0; i < finalContainers.length; i++) {
-    setNormal(finalContainers[i]);
-  }
-}
-//Show signup box and hide login
-function showSignup() {
-  let toShow = [
-    "username",
-    "username-text",
-    "password-repeat",
-    "password-repeat-text",
-  ];
-  let finalShow = [];
-  let finalContainers = [];
-  for (var i = 0; i < toShow.length; i++) {
-    finalShow.push(ac + toShow[i]);
-  }
-  for (var i = 0; i < toNormalize.length; i++) {
-    finalContainers.push(ac + toNormalize[i]);
-  }
-  functions.methods.resetAnimation("auth-container-inputs");
-
-  functions.methods.changeValue("auth-button", "Sign-up");
-  functions.methods.changeText("auth-button", "Sign-up");
-
-  functions.methods.show(finalShow);
-
-  functions.methods.changeText("error-message", "");
-  auth.methods.setActive("signup-button", "login-button");
-  functions.methods.shrink(
-    ["auth-container", "auth-container-window"],
-    "remove"
-  );
-  functions.methods.extend(["auth-container", "auth-container-window"], "add");
-  setNormal("auth-container-password");
-
-  for (var i = 0; i < finalContainers.length; i++) {
-    setNormal(finalContainers[i]);
-  }
-}
-async function isEmailValid(email) {
-  return EmailValidator.validate(email);
-}
-//Check if all conditions are met for signup form
-async function fieldInSignUpIsFilled() {
-  var username = document.getElementById("auth-container-username").value;
-  var email = document.getElementById("auth-container-email").value;
-  var password = document.getElementById("auth-container-password").value;
-  var passwordrepeat = document.getElementById(
-    "auth-container-password-repeat"
-  ).value;
-
-  if (password.length === 0) fieldIsNull("auth-container-password");
-  else {
-    if (password.length <= 7) fieldIsUnderMinimum("auth-container-password", 8);
-    else setNormal("auth-container-password");
-  }
-  if (username.length === 0) fieldIsNull("auth-container-username");
-  else {
-    if (username.length <= 3) fieldIsUnderMinimum("auth-container-username", 4);
-    else if (username.length > 16)
-      fieldIsOverMaximum("auth-container-container", 16);
-    else setNormal("auth-container-username");
-  }
-  if (email.length === 0) fieldIsNull("auth-container-email");
-  else {
-    if ((await isEmailValid(email)) !== true)
-      wrongEmailSyntax("auth-container-email");
-    else setNormal("auth-container-email");
-  }
-  if (passwordrepeat.length === 0)
-    fieldIsNull("auth-container-password-repeat");
-  else {
-    if (passwordrepeat !== password)
-      passwordDoesntMatch("auth-container-password-repeat");
-    else setNormal("auth-container-password-repeat");
-    setNormal("auth-container-password");
-  }
-
-  while (
-    username.length !== 0 &&
-    email.length !== 0 &&
-    password.length !== 0 &&
-    passwordrepeat.length !== 0 &&
-    username.length > 4 &&
-    username.length < 16 &&
-    password.length > 7 &&
-    (await isEmailValid(email)) === true &&
-    passwordrepeat === password
-  ) {
-    resetInputEffects([
-      "auth-container-username",
-      "auth-container-email",
-      "auth-container-password",
-      "auth-container-password-repeat",
-    ]);
-    break;
-  }
-}
-//Check if all conditions are met for login form
-async function fieldInLoginIsFilled() {
-  var email = document.getElementById("auth-container-email").value;
-  var password = document.getElementById("auth-container-password").value;
-
-  if (password.length === 0) fieldIsNull("auth-container-password");
-  if (email.length === 0) fieldIsNull("auth-container-email");
-  else {
-    if ((await isEmailValid(email)) !== true)
-      wrongEmailSyntax("auth-container-email");
-    else setNormal("auth-container-email");
-  }
-
-  while (
-    email.length !== 0 &&
-    password.length !== 0 &&
-    (await isEmailValid(email)) === true
-  ) {
-    sessionStorage.setItem("token", JSON.stringify(getToken()));
-    console.log("token:", JSON.parse(sessionStorage.getItem("token")));
-
-    resetInputEffects(["auth-container-email", "auth-container-password"]);
-    break;
-  }
-}
-function authorizeUser() {
-  if (document.getElementById("auth-button").value === "Sign-up") {
-    fieldInSignUpIsFilled();
-  } else {
-    fieldInLoginIsFilled();
-  }
-}
 
 export default {
   name: "Authorization",
-  created() {
-    setTimeout(showLogin, 100);
+  methods: {
+    validateLogin() {
+      var email = document.getElementById(ac + "email").value;
+      var password = document.getElementById(ac + "password").value;
+
+      this.validEmail(email);
+      this.validPassword(password);
+
+      while (this.validEmail(email) && this.validPassword(password)) {
+        sessionStorage.setItem("token", JSON.stringify(getToken()));
+        console.table("token:", JSON.parse(sessionStorage.getItem("token")));
+        auth.methods.setNormal(["email", "password"]);
+        functions.methods.changeText("error-message", "")
+        break;
+      }
+    },
+    validateSignup() {
+      var email = document.getElementById(ac + "email").value;
+      var password = document.getElementById(ac + "password").value;
+      var username = document.getElementById(ac + "username").value;
+      var passwordRepeat = document.getElementById(
+        ac + "password-repeat"
+      ).value;
+
+      this.validUsername(username);
+      this.validEmail(email);
+      this.validPassword(password);
+      this.validPasswordRepeat(password, passwordRepeat);
+
+      while (
+        this.validUsername(username) &&
+        this.validEmail(email) &&
+        this.validPassword(password) &&
+        this.validPasswordRepeat(password, passwordRepeat)
+      ) {
+        auth.methods.setNormal([
+          "username",
+          "email",
+          "password",
+          "password-repeat",
+        ]);
+        functions.methods.changeText("error-message", "")
+        break;
+      }
+    },
+    validate() {
+      if (document.getElementById("auth-button").value === "Login") {
+        functions.methods.resetAnimation("error-message");
+        this.validateLogin();
+      } else {
+        this.validateSignup();
+        functions.methods.resetAnimation("error-message");
+      }
+    },
+    validUsername(username) {
+      if (username.length === 0)
+        return auth.methods.fieldIsNull(ac + "username");
+      else {
+        if (username.length < 4)
+          return auth.methods.fieldIsUnderMinimum(ac + "username", 4);
+        else if (username.length > 16)
+          return auth.methods.fieldIsOverMaximum(ac + "username", 16);
+        else auth.methods.setNormal(["username"]);
+      }
+      return true;
+    },
+    validEmail(email) {
+      if (email.length === 0) return auth.methods.fieldIsNull(ac + "email");
+      else {
+        if (EmailValidator.validate(email) !== true)
+          return auth.methods.wrongEmailSyntax(ac + "email");
+        else auth.methods.setNormal(["email"]);
+      }
+      return true;
+    },
+    validPassword(password) {
+      if (password.length === 0)
+        return auth.methods.fieldIsNull(ac + "password");
+      else {
+        if (password.length < 8)
+          return auth.methods.fieldIsUnderMinimum(ac + "password", 8);
+        else auth.methods.setNormal(["password"]);
+      }
+      return true;
+    },
+    validPasswordRepeat(password, passwordRepeat) {
+      if (passwordRepeat.length === 0)
+        return auth.methods.fieldIsNull(ac + "password-repeat");
+      else {
+        if (passwordRepeat !== password)
+          return auth.methods.passwordDoesntMatch(ac + "password-repeat");
+        else if (password !== passwordRepeat)
+          return auth.methods.passwordDoesntMatch(ac + "password-repeat");
+        else auth.methods.setNormal(["password-repeat", "password"]);
+      }
+      return true;
+    },
+    showLogin() {
+      let finalContainers = [];
+      for (var i = 0; i < toNormalize.length; i++) {
+        finalContainers.push(toNormalize[i]);
+      }
+
+      auth.methods.setActive("login-button", "signup-button");
+      functions.methods.resetAnimation(ac + "inputs");
+      functions.methods.changeTextAndValue("auth-button", "Login");
+
+      functions.methods.hide([
+        ac + "username",
+        ac + "username-text",
+        ac + "password-repeat",
+        ac + "password-repeat-text",
+      ]);
+
+      functions.methods.addToClassList([ac.slice(0, -1), ac + "window"], "add");
+
+      functions.methods.changeText("error-message", "");
+      auth.methods.setActive("login-button", "signup-button");
+      functions.methods.shrink([ac.slice(0, -1), ac + "window"], "add");
+      functions.methods.extend([ac.slice(0, -1), ac + "window"], "remove");
+      for (var i = 0; i < finalContainers.length; i++) {
+        auth.methods.setNormal([finalContainers[i]]);
+      }
+    },
+    showSignup() {
+      let finalContainers = [];
+      for (var i = 0; i < toNormalize.length; i++) {
+        finalContainers.push(toNormalize[i]);
+      }
+      functions.methods.resetAnimation(ac + "inputs");
+      functions.methods.changeTextAndValue("auth-button", "Sign-up");
+      functions.methods.show([
+        ac + "username",
+        ac + "username-text",
+        ac + "password-repeat",
+        ac + "password-repeat-text",
+      ]);
+
+      functions.methods.changeText("error-message", "");
+      auth.methods.setActive("signup-button", "login-button");
+      functions.methods.shrink([ac.slice(0, -1), ac + "window"], "remove");
+      functions.methods.extend([ac.slice(0, -1), ac + "window"], "add");
+      auth.methods.setNormal(["password"]);
+
+      for (var i = 0; i < finalContainers.length; i++) {
+        auth.methods.setNormal([finalContainers[i]]);
+      }
+    },
   },
-  setup() {
-    return {
-      showLogin,
-      showSignup,
-      authorizeUser,
-    };
+  created() {
+    setTimeout(this.showLogin, 100);
   },
 };
 </script>
@@ -272,7 +204,7 @@ export default {
               <button
                 type="button"
                 id="login-button"
-                @click="showLogin"
+                @click="showLogin()"
                 class="
                   rounded-tl-2xl
                   bg-slate-200
@@ -281,6 +213,9 @@ export default {
                   hover:bg-amber-400
                   font-bold
                   text-xl
+                  transition
+                  duration-500
+                  ease-out
                 "
               >
                 Login
@@ -290,7 +225,7 @@ export default {
               <button
                 type="button"
                 id="signup-button"
-                @click="showSignup"
+                @click="showSignup()"
                 class="
                   rounded-tr-2xl
                   bg-slate-200
@@ -299,18 +234,29 @@ export default {
                   hover:bg-amber-400
                   font-bold
                   text-xl
+                  transition
+                  duration-500
+                  ease-out
                 "
               >
                 Sign-up
               </button>
             </div>
           </div>
-          <p
+          <div
             id="error-message"
             style="color: red"
-            class="absolute text-sm container mx-auto w-96 top-14"
+            class="
+              absolute
+              text-sm
+              container
+              mx-auto
+              w-96
+              bg-red-200
+              scale
+            "
             value=""
-          ></p>
+          ></div>
           <form
             id="auth-container-inputs"
             class="
@@ -329,7 +275,7 @@ export default {
               id="auth-container-username-text"
               for="auth-container-username"
               class="relative right-36 text-lg font-bold"
-              >Username</label
+              >Username<span style="color: red"> *</span></label
             >
             <input
               id="auth-container-username"
@@ -348,7 +294,7 @@ export default {
               id="auth-container-email-text"
               for="auth-container-email"
               class="relative right-40 text-lg font-bold"
-              >Email</label
+              >Email<span style="color: red"> *</span></label
             >
             <input
               id="auth-container-email"
@@ -366,7 +312,7 @@ export default {
             <label
               for="auth-container-password"
               class="relative right-36 text-lg font-bold"
-              >Password</label
+              >Password<span style="color: red"> *</span></label
             >
             <input
               id="auth-container-password"
@@ -385,7 +331,7 @@ export default {
               id="auth-container-password-repeat-text"
               for="auth-container-password-repeat"
               class="relative right-28 text-lg font-bold"
-              >Repeat Password</label
+              >Repeat Password<span style="color: red"> *</span></label
             >
             <input
               id="auth-container-password-repeat"
@@ -402,12 +348,12 @@ export default {
             />
           </form>
           <div
-            @click="authorizeUser"
             id="confirm-button"
             class="bottom-6 absolute right-0 container mx-auto"
           >
             <button
               type="button"
+              @click="validate()"
               value=""
               id="auth-button"
               class="
@@ -444,9 +390,20 @@ export default {
   border: 1px solid red !important;
 }
 
+.scale {
+  animation: scale forwards ease-out 0.3s;
+  transform: scale(0);
+}
+
 @keyframes fadeIn {
   100% {
     opacity: 1;
+  }
+}
+
+@keyframes scale {
+  100% {
+    transform: scale(1);
   }
 }
 
