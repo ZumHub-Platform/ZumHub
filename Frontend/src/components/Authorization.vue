@@ -6,7 +6,7 @@ let toNormalize = ["email", "password", "username", "password-repeat"];
 let ac = "auth-container-";
 
 //Get session token of user
-async function getToken() {
+/* async function getToken() {
   var email = "admin@test.com";
   var password = "admin";
   var authorization = "Basic " + btoa(email + ":" + password);
@@ -25,7 +25,7 @@ async function getToken() {
       return err;
     },
   });
-}
+} */
 
 
 /*
@@ -44,8 +44,8 @@ function getData() {
 }
 */
 
-var data = (JSON.stringify(await getToken()));
-console.log(data);
+/* var data = (JSON.stringify(await getToken()));
+console.log(data); */
 
 export default {
   name: "Authorization",
