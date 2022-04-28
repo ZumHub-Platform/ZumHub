@@ -54,6 +54,7 @@ public class Initializer {
         defaultServer.getEnvironment().setAccessControlMaxAge(600);
         defaultServer.getEnvironment().setAllowedRequestTypes(RequestType.GET, RequestType.POST, RequestType.PUT,
                 RequestType.DELETE, RequestType.HEAD);
+        defaultServer.getEnvironment().setCrossOriginDomains("localhost:1048");
 
         MappingService.getService().findMappings("com.application.client");
 
