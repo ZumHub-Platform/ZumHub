@@ -6,6 +6,7 @@ import com.application.client.rank.RankManager;
 import com.server.Environment;
 import com.server.HimariServer;
 import com.server.mapping.MappingService;
+import com.server.request.RequestType;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,12 @@ public class Initializer {
 
         ClientManager.getInstance().initialize();
 
-        defaultServer.getEnvironment().setDefaultHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+        defaultServer.getEnvironment().setAccessControlAllowCrossOrigin(true);
+        defaultServer.getEnvironment().setAccessControlAllowCredentials(true);
+        defaultServer.getEnvironment().setDefaultHeaders(HttpHeaderNames.AUTHORIZATION);
+        defaultServer.getEnvironment().setAccessControlMaxAge(600);
+        defaultServer.getEnvironment().setAllowedRequestTypes(RequestType.GET, RequestType.POST, RequestType.PUT,
+                RequestType.DELETE, RequestType.HEAD);
 
         MappingService.getService().findMappings("com.application.client");
 

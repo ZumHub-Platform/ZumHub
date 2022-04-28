@@ -6,7 +6,7 @@ let toNormalize = ["email", "password", "username", "password-repeat"];
 let ac = "auth-container-";
 
 //Get session token of user
-/* async function getToken() {
+/*async function getToken() {
   var email = "admin@test.com";
   var password = "admin";
   var authorization = "Basic " + btoa(email + ":" + password);
@@ -25,11 +25,23 @@ let ac = "auth-container-";
       return err;
     },
   });
-} */
+}*/
 
 
-/*
+
 function getData() {
+var settings = {
+  "url": "http://localhost:1048/login",
+  "method": "GET",
+  "timeout": 0,
+  "headers": {
+    "Authorization": "Basic YWRtaW5AdGVzdC5jb206YWRtaW4="
+  },
+};
+
+$.ajax(settings).done(function (response) {
+  console.log(response);
+});
   var settings = {
     "url": "http://localhost:1048/login",
     "method": "GET",
@@ -42,10 +54,10 @@ function getData() {
     console.log(response);
   });
 }
-*/
 
-/* var data = (JSON.stringify(await getToken()));
-console.log(data); */
+
+var data = (JSON.stringify(getData()));
+console.log(data);
 
 export default {
   name: "Authorization",

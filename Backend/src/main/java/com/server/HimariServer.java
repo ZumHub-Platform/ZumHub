@@ -43,7 +43,7 @@ public class HimariServer implements Server {
 
             httpBootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new DefaultNetworkInitializer())
+                    .childHandler(new DefaultNetworkInitializer(environment))
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 

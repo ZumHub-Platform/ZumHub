@@ -16,8 +16,8 @@
 
 package com.server.request;
 
-import com.application.Initializer;
 import com.google.gson.Gson;
+import com.server.mapping.Mapping;
 import com.server.mapping.MappingService;
 import com.server.response.Content;
 import com.server.response.Response;
@@ -29,6 +29,8 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 
 public class DefaultRequestListener extends RequestListener {
+
+    private final Mapping<String> connectionSetupMapping = new ConnectionSetupMapping();
 
     @Override
     public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest msg) {
@@ -71,22 +73,29 @@ public class DefaultRequestListener extends RequestListener {
                 response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
             }
 
-            Initializer.getDefaultServer().getEnvironment().getDefaultHeaders().forEach((name, value) -> response.headers().set(name, value));
             content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
         } else {
             Content<?> content = mappedResponse.getContent();
-            ByteBuf contentBuffer = Unpooled.copiedBuffer(mappedResponse.getContent().getContentAsString(), CharsetUtil.UTF_8);
+            ByteBuf contentBuffer = Unpooled.copiedBuffer(mappedResponse.getContent().getContentAsString(),
+                    CharsetUtil.UTF_8);
 
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, mappedResponse.getStatus(), contentBuffer);
 
             response.headers().set(HttpHeaderNames.CONTENT_TYPE, content.getType().getContentType());
             response.headers().set(HttpHeaderNames.CONTENT_LENGTH, contentBuffer.readableBytes());
 
-            Initializer.getDefaultServer().getEnvironment().getDefaultHeaders().forEach((name, value) -> response.headers().set(name, value));
             content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
         }
 
         ctx.write(response);
         ctx.flush();
+    }
+
+    private static class ConnectionSetupMapping extends Mapping<String> {
+        @Override
+        public Response<String> handle(Request request) {
+
+            return new StringResponse(new Gson().toJson(request));
+        }
     }
 }

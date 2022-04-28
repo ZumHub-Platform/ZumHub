@@ -16,6 +16,7 @@
 
 package com.server.network;
 
+import com.server.Environment;
 import com.server.request.DefaultRequestListener;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
@@ -24,11 +25,18 @@ import io.netty.handler.codec.http.HttpServerCodec;
 
 public class DefaultNetworkInitializer extends NetworkInitializer {
 
+    private Environment environment;
+
+    public DefaultNetworkInitializer(Environment environment) {
+        this.environment = environment;
+    }
+
     @Override
     protected void initChannel(Channel ch) {
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE));
+        pipeline.addLast(new HttpClientConfiguration(environment));
         pipeline.addLast(new DefaultRequestListener());
     }
 }
