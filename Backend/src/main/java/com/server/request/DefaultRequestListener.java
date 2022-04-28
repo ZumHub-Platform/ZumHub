@@ -17,7 +17,6 @@
 package com.server.request;
 
 import com.google.gson.Gson;
-import com.server.mapping.Mapping;
 import com.server.mapping.MappingService;
 import com.server.response.Content;
 import com.server.response.Response;
@@ -29,8 +28,6 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 
 public class DefaultRequestListener extends RequestListener {
-
-    private final Mapping<String> connectionSetupMapping = new ConnectionSetupMapping();
 
     @Override
     public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest msg) {
@@ -54,16 +51,17 @@ public class DefaultRequestListener extends RequestListener {
 
         if (mappedResponse instanceof StringResponse) {
             if (mappedResponse.isDone()) {
-                writeResponse(ctx, RequestType.valueOf(msg.method().name()), mappedResponse);
+                writeResponse(ctx, msg, RequestType.valueOf(msg.method().name()), mappedResponse);
             } else {
                 Response<?> finalMappedResponse = mappedResponse;
                 mappedResponse.getAsyncContent().thenAccept(content ->
-                        writeResponse(ctx, RequestType.valueOf(msg.method().name()), finalMappedResponse));
+                        writeResponse(ctx, msg, RequestType.valueOf(msg.method().name()), finalMappedResponse));
             }
         }
     }
 
-    private void writeResponse(ChannelHandlerContext ctx, RequestType requestType, Response<?> mappedResponse) {
+    private void writeResponse(ChannelHandlerContext ctx, FullHttpRequest msg, RequestType requestType,
+                               Response<?> mappedResponse) {
         FullHttpResponse response;
         if (mappedResponse.getContent().getContent() == null) {
             Content<?> content = mappedResponse.getContent();
@@ -71,6 +69,13 @@ public class DefaultRequestListener extends RequestListener {
 
             if (requestType.hasBody()) {
                 response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
+            }
+
+            if (msg.headers().contains(HttpHeaderNames.ORIGIN) && msg.headers().contains(HttpHeaderNames.AUTHORIZATION)) {
+                response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        msg.headers().get(HttpHeaderNames.ORIGIN));
+            } else {
+                response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
             }
 
             content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
@@ -84,18 +89,17 @@ public class DefaultRequestListener extends RequestListener {
             response.headers().set(HttpHeaderNames.CONTENT_TYPE, content.getType().getContentType());
             response.headers().set(HttpHeaderNames.CONTENT_LENGTH, contentBuffer.readableBytes());
 
+            if (msg.headers().contains(HttpHeaderNames.ORIGIN) && msg.headers().contains(HttpHeaderNames.AUTHORIZATION)) {
+                response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        msg.headers().get(HttpHeaderNames.ORIGIN));
+            } else {
+                response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+            }
+
             content.getHeaders().forEach((name, value) -> response.headers().set(name, value));
         }
 
         ctx.write(response);
         ctx.flush();
-    }
-
-    private static class ConnectionSetupMapping extends Mapping<String> {
-        @Override
-        public Response<String> handle(Request request) {
-
-            return new StringResponse(new Gson().toJson(request));
-        }
     }
 }
