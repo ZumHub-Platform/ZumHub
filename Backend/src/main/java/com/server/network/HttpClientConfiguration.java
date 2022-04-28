@@ -9,6 +9,8 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.AsciiString;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class HttpClientConfiguration extends ChannelInboundHandlerAdapter {
 
@@ -28,11 +30,17 @@ public class HttpClientConfiguration extends ChannelInboundHandlerAdapter {
         if (clientRequest.getRequestType().equals(RequestType.OPTIONS)) {
             FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
 
-            if (request.headers().contains(HttpHeaderNames.ACCESS_CONTROL_REQUEST_METHOD)) {
-                HttpMethod[] requestedMethods =
-                        Arrays.stream(request.headers().getAll(HttpHeaderNames.ACCESS_CONTROL_REQUEST_METHOD)
-                                .toArray()).map(s -> HttpMethod.valueOf((String) s)).toArray(HttpMethod[]::new);
+            List<HttpMethod> requestedMethods =
+                    request.headers().contains(HttpHeaderNames.ACCESS_CONTROL_REQUEST_METHOD) ?
+                            Arrays.stream(request.headers().getAll(HttpHeaderNames.ACCESS_CONTROL_REQUEST_METHOD)
+                                    .toArray()).map(s -> HttpMethod.valueOf((String) s)).collect(Collectors.toUnmodifiableList()) : null;
 
+            List<AsciiString> requestedHeaders =
+                    request.headers().contains(HttpHeaderNames.ACCESS_CONTROL_REQUEST_HEADERS) ?
+                            request.headers().getAll(HttpHeaderNames.ACCESS_CONTROL_REQUEST_HEADERS).stream().map(AsciiString::of).collect(Collectors.toUnmodifiableList()) : null;
+
+
+            if (requestedMethods != null) {
                 for (HttpMethod method : requestedMethods) {
                     if (!environment.getAllowedRequestTypes().contains(RequestType.valueOf(method.name()))) {
                         response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
@@ -42,10 +50,7 @@ public class HttpClientConfiguration extends ChannelInboundHandlerAdapter {
                 }
             }
 
-            if (request.headers().contains(HttpHeaderNames.ACCESS_CONTROL_REQUEST_HEADERS)) {
-                AsciiString[] requestedHeaders =
-                        request.headers().getAll(HttpHeaderNames.ACCESS_CONTROL_REQUEST_HEADERS).stream().map(AsciiString::of).toArray(AsciiString[]::new);
-
+            if (requestedHeaders != null) {
                 for (AsciiString headers : requestedHeaders) {
                     if (!environment.getAllowedHeaders().contains(headers)) {
                         response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
@@ -65,11 +70,13 @@ public class HttpClientConfiguration extends ChannelInboundHandlerAdapter {
                             Arrays.toString(environment.getAllowedHeaders().toArray())
                                     .replace("[", "").replace("]", ""));
 
-            response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN,
-                    environment.isAccessControlAllowCrossOrigin() ?
-                            environment.getCrossOriginDomains().size() == 0 && environment.isAccessControlAllowCrossOrigin() ? "*" :
-                                    Arrays.toString(environment.getCrossOriginDomains().toArray()).replace("[", "").replace(
-                                            "]", "") : "null");
+            if (requestedHeaders != null && requestedHeaders.contains(HttpHeaderNames.AUTHORIZATION) &&
+                    request.headers().contains(HttpHeaderNames.ORIGIN) && environment.isAccessControlAllowCredentials()) {
+                response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        request.headers().get(HttpHeaderNames.ORIGIN));
+            } else {
+                response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+            }
 
             response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS,
                     environment.isAccessControlAllowCredentials() ? "true" : "false");
