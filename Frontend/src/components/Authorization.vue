@@ -27,8 +27,6 @@ let ac = "auth-container-";
   });
 }*/
 
-
-
 function getData() {
 var settings = {
   "url": "http://localhost:1048/login",
