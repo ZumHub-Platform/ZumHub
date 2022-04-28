@@ -23,7 +23,9 @@ public class HttpClientConfiguration extends ChannelInboundHandlerAdapter {
         FullHttpRequest request = (FullHttpRequest) msg;
         Request clientRequest = Request.buildRequest(request);
 
-        if (clientRequest.getRequestType().equals(RequestType.OPTIONS) && request.uri().equals("/*")) {
+        System.out.println("Request: " + clientRequest.getRequestType() + " " + ((FullHttpRequest) msg).uri());
+
+        if (clientRequest.getRequestType().equals(RequestType.OPTIONS)) {
             FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
 
             if (request.headers().contains(HttpHeaderNames.ACCESS_CONTROL_REQUEST_METHOD)) {
