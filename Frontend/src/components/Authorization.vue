@@ -29,23 +29,13 @@ async function getToken() {
   });
 }
 
-getToken();
+await getToken();
 
-/*function getData() {
-var settings = {
-  "url": "http://localhost:1048/login",
-  "method": "GET",
-  "timeout": 0,
-  "headers": {
-    "Authorization": "Basic YWRtaW5AdGVzdC5jb206YWRtaW4="
-  },
-};
-*/
 
-/*function getData() {
+/* function getData() {
   var settings = {
     "url": "http://localhost:1048/login",
-    "method": "GET",
+    "type": "GET",
     "timeout": 0,
     "headers": {
       "Authorization": "Basic ZGV2ZWxvcGVyQHRlc3QuY29tOjY1TFdLZmhVNGV1Q2czRjlReUJ5cWhobUpLNjR3Z2gyZGs1TnVhdndjU0s4OVJSVUVMVzg3d01ibVlFZE1LdDU="
@@ -55,9 +45,9 @@ var settings = {
     console.log(response);
   });
 }
-*/
 
-/* var data = (JSON.stringify(getData()));
+
+var data = (getData());
 console.log(data); */
 
 export default {
