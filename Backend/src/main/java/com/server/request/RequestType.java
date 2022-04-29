@@ -26,12 +26,25 @@ public enum RequestType {
     CONNECT(true),
     OPTIONS(true),
     TRACE(false),
-    PATCH(true);
+    PATCH(true),
+    UNKNOWN(false);
 
     private final boolean bodyAllowed;
 
     RequestType(boolean bodyAllowed) {
         this.bodyAllowed = bodyAllowed;
+    }
+
+    public static RequestType fromString(String type) {
+        if (type == null) {
+            return UNKNOWN;
+        }
+        for (RequestType requestType : values()) {
+            if (requestType.name().equalsIgnoreCase(type)) {
+                return requestType;
+            }
+        }
+        return UNKNOWN;
     }
 
     public boolean hasBody() {

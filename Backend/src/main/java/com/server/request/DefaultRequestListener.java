@@ -19,7 +19,6 @@ package com.server.request;
 import com.google.gson.Gson;
 import com.server.mapping.MappingService;
 import com.server.response.Content;
-import com.server.response.Response;
 import com.server.response.StringResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -32,7 +31,7 @@ public class DefaultRequestListener extends RequestListener {
     @Override
     public void handleRequest(ChannelHandlerContext ctx, FullHttpRequest msg) {
         MappingService mappingService = MappingService.getService();
-        Response<?> mappedResponse;
+        StringResponse<?> mappedResponse;
         try {
             mappedResponse = mappingService.route(msg, msg.uri());
         } catch (Exception e) {
@@ -53,7 +52,7 @@ public class DefaultRequestListener extends RequestListener {
             if (mappedResponse.isDone()) {
                 writeResponse(ctx, msg, RequestType.valueOf(msg.method().name()), mappedResponse);
             } else {
-                Response<?> finalMappedResponse = mappedResponse;
+                StringResponse<?> finalMappedResponse = mappedResponse;
                 mappedResponse.getAsyncContent().thenAccept(content ->
                         writeResponse(ctx, msg, RequestType.valueOf(msg.method().name()), finalMappedResponse));
             }
@@ -61,7 +60,7 @@ public class DefaultRequestListener extends RequestListener {
     }
 
     private void writeResponse(ChannelHandlerContext ctx, FullHttpRequest msg, RequestType requestType,
-                               Response<?> mappedResponse) {
+                               StringResponse<?> mappedResponse) {
         FullHttpResponse response;
         if (mappedResponse.getContent().getContent() == null) {
             Content<?> content = mappedResponse.getContent();

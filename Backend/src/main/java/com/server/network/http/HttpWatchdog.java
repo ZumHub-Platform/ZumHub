@@ -1,4 +1,4 @@
-package com.server.network;
+package com.server.network.http;
 
 import com.server.Environment;
 import com.server.request.Request;
@@ -12,11 +12,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class HttpClientConfiguration extends ChannelInboundHandlerAdapter {
+public class HttpWatchdog extends ChannelInboundHandlerAdapter {
 
     private final Environment environment;
 
-    public HttpClientConfiguration(Environment environment) {
+    public HttpWatchdog(Environment environment) {
         this.environment = environment;
     }
 
@@ -24,8 +24,6 @@ public class HttpClientConfiguration extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         FullHttpRequest request = (FullHttpRequest) msg;
         Request clientRequest = Request.buildRequest(request);
-
-        System.out.println("Request: " + clientRequest.getRequestType() + " " + ((FullHttpRequest) msg).uri());
 
         if (clientRequest.getRequestType().equals(RequestType.OPTIONS)) {
             FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);

@@ -16,26 +16,11 @@
 
 package com.server.mapping;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.server.request.Request;
+import com.server.response.StringResponse;
 
-public class MappingContainer {
+public interface MappingHandler<R> {
 
-    private final Map<String, MappingHolder<?>> mappings = new ConcurrentHashMap<>();
-
-    public Map<String, MappingHolder<?>> getMappings() {
-        return mappings;
-    }
-
-    public MappingHolder<?> findMapping(String name) {
-        return mappings.get(name);
-    }
-
-    public void addMapping(String name, MappingHolder<?> mapping) {
-        this.mappings.put(name, mapping);
-    }
-
-    public void removeMapping(String name) {
-        this.mappings.remove(name);
-    }
+    StringResponse<R> handle(Request request);
 }
+

@@ -25,11 +25,13 @@ public class Request {
 
     public static Request buildRequest(FullHttpRequest request) {
         RequestType requestType = RequestType.valueOf(request.method().name());
-        Map<String, String> headers = request.headers().entries().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> headers = request.headers().entries().stream().collect(Collectors.toMap(Map.Entry::getKey
+                , Map.Entry::getValue));
         String[] parameters = request.uri().split("\\?");
         Map<String, String> parametersMap;
         if (parameters.length > 1) {
-            parametersMap = Arrays.stream(parameters[1].split("&")).collect(Collectors.toMap(parameter -> parameter.split("=")[0], parameter -> parameter.split("=")[1]));
+            parametersMap =
+                    Arrays.stream(parameters[1].split("&")).collect(Collectors.toMap(parameter -> parameter.split("=")[0], parameter -> parameter.split("=")[1]));
         } else {
             parametersMap = new HashMap<>(0);
         }

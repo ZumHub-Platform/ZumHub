@@ -16,17 +16,17 @@
 
 package com.server.request;
 
+import com.server.network.http.HttpMapper;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.FullHttpRequest;
 
 
-public abstract class RequestListener extends SimpleChannelInboundHandler<FullHttpRequest> {
+public abstract class RequestListener extends SimpleChannelInboundHandler<HttpMapper.RequestWrapper> {
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, FullHttpRequest fullHttpRequest) throws Exception {
-        this.handleRequest(channelHandlerContext, fullHttpRequest);
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, HttpMapper.RequestWrapper request) throws Exception {
+        this.handleRequest(channelHandlerContext, request);
     }
 
-    public abstract void handleRequest(ChannelHandlerContext ctx, FullHttpRequest msg);
+    public abstract void handleRequest(ChannelHandlerContext ctx, HttpMapper.RequestWrapper request);
 }

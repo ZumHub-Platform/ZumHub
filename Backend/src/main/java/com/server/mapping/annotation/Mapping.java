@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 @Target({java.lang.annotation.ElementType.METHOD})
 public @interface Mapping {
 
-    String value() default "/";
+    String path() default "/";
 
     RequestType method() default RequestType.GET;
 
