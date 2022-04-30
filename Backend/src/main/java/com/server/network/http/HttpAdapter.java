@@ -1,5 +1,6 @@
 package com.server.network.http;
 
+import com.server.request.RequestWrapper;
 import com.server.response.Response;
 import com.server.response.StringResponse;
 import io.netty.buffer.ByteBuf;
@@ -14,9 +15,9 @@ import io.netty.util.CharsetUtil;
 
 import java.util.Arrays;
 
-public abstract class HttpAdapter<R> extends ChannelInboundHandlerAdapter {
+public abstract class HttpAdapter extends ChannelInboundHandlerAdapter {
 
-    public void writeResponse(ChannelHandlerContext ctx, HttpMapper.RequestWrapper request, Response<R> response) {
+    public <R> void writeResponse(ChannelHandlerContext ctx, RequestWrapper request, Response<R> response) {
         HttpResponse httpResponse;
         if (response instanceof StringResponse) {
             if (response.getContent() != null && response.getContent().getContent() != null && response.getContent().getContentAsString().length() > 0) {

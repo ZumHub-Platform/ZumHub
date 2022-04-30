@@ -9,14 +9,31 @@ import java.util.function.Consumer;
 
 public interface Response<T> {
 
-    @NotNull
+    StringResponse EMPTY_RESPONSE = new StringResponse(HttpResponseStatus.BAD_REQUEST, new Content<>("",
+            ContentType.APPLICATION_JSON));
+    StringResponse OK_RESPONSE = new StringResponse(HttpResponseStatus.OK, new Content<>("",
+            ContentType.APPLICATION_JSON));
+    StringResponse UNAUTHORIZED = new StringResponse(HttpResponseStatus.UNAUTHORIZED, new Content<>("",
+            ContentType.APPLICATION_JSON));
+    StringResponse FORBIDDEN = new StringResponse(HttpResponseStatus.FORBIDDEN, new Content<>("",
+            ContentType.APPLICATION_JSON));
+    StringResponse NOT_FOUND = new StringResponse(HttpResponseStatus.NOT_FOUND, new Content<>("",
+            ContentType.APPLICATION_JSON));
+    StringResponse INTERNAL_SERVER_ERROR = new StringResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
+            new Content<>("", ContentType.APPLICATION_JSON));
+    StringResponse BAD_REQUEST = new StringResponse(HttpResponseStatus.BAD_REQUEST, new Content<>("",
+            ContentType.APPLICATION_JSON));
+
+    @Nullable
     CompletableFuture<Content<T>> getAsynchronousContent();
+
+    Response<T> setAsynchronousContent(@Nullable CompletableFuture<Content<T>> content);
 
     @Nullable
     Content<T> getContent();
 
     @NotNull
-    Response<T> thenApply(@NotNull Consumer<? super Content<T>> action);
+    Response<String> thenAccept(@NotNull Consumer<? super Content<String>> action);
 
     @NotNull
     HttpResponseStatus getStatus();

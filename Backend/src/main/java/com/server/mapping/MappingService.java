@@ -22,9 +22,9 @@ import com.server.mapping.annotation.Controller;
 import com.server.mapping.annotation.Mapping;
 import com.server.mapping.annotation.SecurityPolicy;
 import com.server.request.Request;
+import com.server.request.RequestMethod;
+import com.server.response.Response;
 import com.server.response.StringResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.AsciiString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,36 +42,6 @@ public final class MappingService {
 
     public static MappingService getService() {
         return instance;
-    }
-
-    public StringResponse<?> route(FullHttpRequest request, String url) {
-        QueryStringDecoder decoder = new QueryStringDecoder(url);
-        String route = decoder.path();
-
-        MappingHandler<?> mapping = container.findMapping(route);
-
-        Request req = Request.buildRequest(request);
-
-        if (mapping == null) {
-            MappingHandler<?> defaultMapping = container.findMapping("/");
-            if (defaultMapping == null) {
-                return StringResponse.EMPTY_RESPONSE;
-            }
-
-            if (req.validateRequestHeaders(defaultMapping.getRequiredHeaders()) &&
-                    req.validateRequestParameters(defaultMapping.getRequiredParameters())) {
-                return defaultMapping.handle(Request.buildRequest(request));
-            } else {
-                throw new IllegalArgumentException("Request doesn't match required headers or parameters.");
-            }
-        }
-
-        if (req.validateRequestHeaders(mapping.getRequiredHeaders()) &&
-                req.validateRequestParameters(mapping.getRequiredParameters())) {
-            return mapping.handle(Request.buildRequest(request));
-        } else {
-            throw new IllegalArgumentException("Request doesn't match required headers or parameters.");
-        }
     }
 
     public boolean registerMapping(MappingHolder<?> mapping) {
@@ -105,18 +75,12 @@ public final class MappingService {
                 Mapping mappingAnnotation = method.getAnnotation(Mapping.class);
                 SecurityPolicy methodSecurityPolicy = method.getAnnotation(SecurityPolicy.class);
 
-                MappingHandler<?> mapping = (MappingHandler<String>) request -> {
-                    if (request.getRequestType() != mappingAnnotation.method()) {
-                        return StringResponse.EMPTY_RESPONSE;
-                    }
-
+                MappingHandler<?> mapping = request -> {
                     try {
-                        StringResponse<?> response = method.invoke(clazz.getDeclaredConstructor().newInstance(),
-                                request) == null ?
-                                StringResponse.EMPTY_RESPONSE :
-                                (StringResponse<?>) method.invoke(clazz.getDeclaredConstructor().newInstance(),
-                                        request);
-                        return (StringResponse<String>) response;
+                        Response<?> response = method.invoke(clazz.getDeclaredConstructor().newInstance(),
+                                request) == null ? StringResponse.EMPTY_RESPONSE :
+                                (Response<?>) method.invoke(clazz.getDeclaredConstructor().newInstance(), request);
+                        return (Response<Object>) response;
                     } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
                              NoSuchMethodException e) {
                         throw new RuntimeException(e);
@@ -129,8 +93,9 @@ public final class MappingService {
                 MappingSecurity security = createMappingSecurity(clazzSecurityPolicy, methodSecurityPolicy);
                 MappingHolder<?> holder = new MappingHolder<>(path, security, mapping);
 
-                holder.setRequiredParameters(Arrays.stream(method.getAnnotation(com.server.mapping.annotation.Mapping.class).parameters()).toArray(String[]::new));
-                holder.setRequiredHeaders(Arrays.stream(method.getAnnotation(com.server.mapping.annotation.Mapping.class).headers()).map(AsciiString::of).toArray(AsciiString[]::new));
+                holder.setRestrictedRequestTypes(Arrays.stream(mappingAnnotation.method()).map(type -> RequestMethod.fromString(type.name())).toArray(RequestMethod[]::new));
+                holder.setRequiredParameters(Arrays.stream(mappingAnnotation.parameters()).toArray(String[]::new));
+                holder.setRequiredHeaders(Arrays.stream(mappingAnnotation.headers()).map(AsciiString::of).toArray(AsciiString[]::new));
 
                 registerMapping(holder);
             }
@@ -139,12 +104,14 @@ public final class MappingService {
 
     private MappingSecurity createMappingSecurity(SecurityPolicy clazzSecurityPolicy,
                                                   SecurityPolicy methodSecurityPolicy) {
-        if (clazzSecurityPolicy != null) {
+        if (clazzSecurityPolicy != null && methodSecurityPolicy != null) {
+            return new MappingSecurity(clazzSecurityPolicy, methodSecurityPolicy);
+        } else if (clazzSecurityPolicy != null) {
             return new MappingSecurity(clazzSecurityPolicy);
         } else if (methodSecurityPolicy != null) {
             return new MappingSecurity(methodSecurityPolicy);
         } else {
-            return new MappingSecurity(null, false, null, null, 8600);
+            return new MappingSecurity(null, false, null, null, null, 8600);
         }
     }
 

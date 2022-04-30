@@ -25,44 +25,40 @@ import java.util.function.Consumer;
 
 public class StringResponse implements Response<String> {
 
-    public static Response<String> EMPTY_RESPONSE = new StringResponse(new Content<>("",
-            ContentType.APPLICATION_JSON)).
-            setStatus(HttpResponseStatus.BAD_REQUEST);
-    public static Response<String> OK_RESPONSE = new StringResponse(new Content<>("",
-            ContentType.APPLICATION_JSON)).
-            setStatus(HttpResponseStatus.OK);
-    public static Response<String> UNAUTHORIZED = new StringResponse(new Content<>("",
-            ContentType.APPLICATION_JSON)).
-            setStatus(HttpResponseStatus.UNAUTHORIZED);
-    public static Response<String> FORBIDDEN = new StringResponse(new Content<>("",
-            ContentType.APPLICATION_JSON)).
-            setStatus(HttpResponseStatus.FORBIDDEN);
-    public static Response<String> NOT_FOUND = new StringResponse(new Content<>("",
-            ContentType.APPLICATION_JSON)).
-            setStatus(HttpResponseStatus.NOT_FOUND);
-    public static Response<String> INTERNAL_SERVER_ERROR = new StringResponse(new Content<>("",
-            ContentType.APPLICATION_JSON)).
-            setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
-
-    private final CompletableFuture<Content<String>> content;
+    private CompletableFuture<Content<String>> content;
     private HttpResponseStatus status = HttpResponseStatus.NO_CONTENT;
 
     public StringResponse() {
         this.content = CompletableFuture.completedFuture(null);
     }
 
-    public StringResponse(@NotNull Content<String> content) {
+    public StringResponse(@Nullable Content<String> content) {
         this(CompletableFuture.completedFuture(content));
     }
 
-    public StringResponse(@NotNull CompletableFuture<Content<String>> content) {
+    public StringResponse(@Nullable CompletableFuture<Content<String>> content) {
         this.content = content;
+    }
+
+    public StringResponse(@NotNull HttpResponseStatus status, @Nullable CompletableFuture<Content<String>> content) {
+        this.content = content;
+        this.status = status;
+    }
+
+    public StringResponse(@NotNull HttpResponseStatus status, @Nullable Content<String> content) {
+        this(status, CompletableFuture.completedFuture(content));
     }
 
     @NotNull
     @Override
     public CompletableFuture<Content<String>> getAsynchronousContent() {
         return this.content;
+    }
+
+    @Override
+    public Response<String> setAsynchronousContent(@Nullable CompletableFuture<Content<String>> content) {
+        this.content = content;
+        return this;
     }
 
     @Nullable
@@ -73,8 +69,9 @@ public class StringResponse implements Response<String> {
 
     @NotNull
     @Override
-    public Response<String> thenApply(@NotNull Consumer<? super Content<String>> action) {
-        return this.thenApply(action);
+    public Response<String> thenAccept(@NotNull Consumer<? super Content<String>> action) {
+        this.content.thenAccept(action);
+        return this;
     }
 
     @NotNull

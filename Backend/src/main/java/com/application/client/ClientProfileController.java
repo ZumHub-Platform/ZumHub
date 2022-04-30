@@ -5,7 +5,7 @@ import com.google.common.base.Charsets;
 import com.server.mapping.annotation.Controller;
 import com.server.mapping.annotation.Mapping;
 import com.server.request.Request;
-import com.server.request.RequestType;
+import com.server.response.Response;
 import com.server.response.StringResponse;
 import org.bson.types.ObjectId;
 
@@ -14,8 +14,8 @@ import java.util.Base64;
 @Controller
 public class ClientProfileController {
 
-    @Mapping(path = "/profile", method = RequestType.GET, parameters = {"identifier"})
-    public StringResponse<String> getProfile(Request request) {
+    @Mapping(path = "/profile", parameters = {"identifier"})
+    public StringResponse getProfile(Request request) {
         String identifier = request.getParameter("identifier");
         boolean authenticated = false;
 
@@ -40,9 +40,9 @@ public class ClientProfileController {
         ClientProfile profile = ClientManager.getInstance().getClientProfileAuthority().searchClientProfile(id);
 
         if (profile == null) {
-            return StringResponse.NOT_FOUND;
+            return Response.NOT_FOUND;
         }
 
-        return StringResponse.INTERNAL_SERVER_ERROR;
+        return Response.INTERNAL_SERVER_ERROR;
     }
 }

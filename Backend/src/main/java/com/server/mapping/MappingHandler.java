@@ -17,10 +17,10 @@
 package com.server.mapping;
 
 import com.server.request.Request;
-import com.server.response.StringResponse;
+import com.server.response.Response;
 
 public interface MappingHandler<R> {
 
-    StringResponse<R> handle(Request request);
+    Response<R> handle(Request request);
 }
 

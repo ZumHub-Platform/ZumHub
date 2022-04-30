@@ -16,7 +16,7 @@
 
 package com.server.request;
 
-public enum RequestType {
+public enum RequestMethod {
 
     GET(true),
     HEAD(false),
@@ -31,17 +31,17 @@ public enum RequestType {
 
     private final boolean bodyAllowed;
 
-    RequestType(boolean bodyAllowed) {
+    RequestMethod(boolean bodyAllowed) {
         this.bodyAllowed = bodyAllowed;
     }
 
-    public static RequestType fromString(String type) {
+    public static RequestMethod fromString(String type) {
         if (type == null) {
             return UNKNOWN;
         }
-        for (RequestType requestType : values()) {
-            if (requestType.name().equalsIgnoreCase(type)) {
-                return requestType;
+        for (RequestMethod requestMethod : values()) {
+            if (requestMethod.name().equalsIgnoreCase(type)) {
+                return requestMethod;
             }
         }
         return UNKNOWN;

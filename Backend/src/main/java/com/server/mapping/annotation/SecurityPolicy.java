@@ -13,11 +13,11 @@ public @interface SecurityPolicy {
 
     boolean allowCredentials() default false;
 
-    String[] allowedHeaders() default "";
+    String[] allowedHeaders() default {};
 
-    String[] allowedMethods() default "";
+    String[] allowedMethods() default {};
 
-    String[] exposedHeaders() default "";
+    String[] exposedHeaders() default {};
 
     int maxAge() default -1;
 }

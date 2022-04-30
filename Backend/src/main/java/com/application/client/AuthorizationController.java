@@ -9,8 +9,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.server.mapping.annotation.Controller;
 import com.server.mapping.annotation.Mapping;
+import com.server.mapping.annotation.SecurityPolicy;
 import com.server.request.Request;
-import com.server.request.RequestType;
+import com.server.request.RequestMethod;
 import com.server.response.Content;
 import com.server.response.ContentType;
 import com.server.response.StringResponse;
@@ -22,22 +23,24 @@ import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 
 @Controller
-public class ClientController {
+@SecurityPolicy(allowedOrigins = "localhost:3000", allowCredentials = true)
+public class AuthorizationController {
 
     public static Gson CLIENT_PROFILE = new GsonBuilder().registerTypeAdapter(ObjectId.class,
             new ObjectIdSerialization()).create();
 
-    @Mapping(path = "/login", method = RequestType.GET)
-    public StringResponse<String> clientAuthorizationRequest(Request request) {
+    @Mapping(path = "/login")
+    @SecurityPolicy(allowedMethods = "GET", allowedHeaders = "Authorization", exposedHeaders = "Authorization")
+    public StringResponse clientAuthorizationRequest(Request request) {
         String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split(
                 "Basic ")[1]), Charsets.UTF_8);
         String mail = credentials.split(":")[0];
         String password = credentials.split(":")[1];
 
-        StringResponse response = new StringResponse();
-        response.setStatus(HttpResponseStatus.REQUEST_TIMEOUT);
+        StringResponse response = new StringResponse(HttpResponseStatus.REQUEST_TIMEOUT,
+                (CompletableFuture<Content<String>>) null);
 
-        response.setAsyncContent(CompletableFuture.supplyAsync(((Supplier<Content<String>>) () -> {
+        response.setAsynchronousContent(CompletableFuture.supplyAsync(((Supplier<Content<String>>) () -> {
             if (!ClientManager.getInstance().getClientCredentialsAuthority().isClient(mail)) {
                 response.setStatus(HttpResponseStatus.NOT_FOUND);
 
@@ -74,8 +77,9 @@ public class ClientController {
         return response;
     }
 
-    @Mapping(path = "/register", method = RequestType.HEAD)
-    public StringResponse<String> clientRegisterRequest(Request request) {
+    @Mapping(path = "/register", method = RequestMethod.HEAD)
+    @SecurityPolicy(allowedMethods = "HEAD", allowedHeaders = "Authorization", exposedHeaders = "Authorization")
+    public StringResponse clientRegisterRequest(Request request) {
         String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split(
                 "Basic ")[1]), Charsets.UTF_8);
         String mail = credentials.split(":")[0];
@@ -84,7 +88,7 @@ public class ClientController {
         StringResponse response = new StringResponse();
         response.setStatus(HttpResponseStatus.REQUEST_TIMEOUT);
 
-        response.setAsyncContent(CompletableFuture.supplyAsync(((Supplier<Content<String>>) () -> {
+        response.setAsynchronousContent(CompletableFuture.supplyAsync(((Supplier<Content<String>>) () -> {
             try {
                 response.setStatus(HttpResponseStatus.OK);
 
@@ -106,8 +110,8 @@ public class ClientController {
         return response;
     }
 
-    @Mapping(path = "/profile", method = RequestType.GET)
-    public StringResponse<String> clientProfileRequest(Request request) {
+    @Mapping(path = "/profile", method = RequestMethod.GET)
+    public StringResponse clientProfileRequest(Request request) {
         String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split(
                 "Bearer ")[1]), Charsets.UTF_8);
         ClientToken token = new ClientToken(null, credentials);

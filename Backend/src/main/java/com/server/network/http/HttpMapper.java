@@ -4,12 +4,13 @@ import com.server.Environment;
 import com.server.mapping.MappingHolder;
 import com.server.mapping.MappingService;
 import com.server.request.Request;
+import com.server.request.RequestWrapper;
 import com.server.response.StringResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
-public class HttpMapper extends HttpAdapter<String> {
+public class HttpMapper extends HttpAdapter {
 
     private final Environment environment;
 
@@ -33,28 +34,10 @@ public class HttpMapper extends HttpAdapter<String> {
             return;
         }
 
-        ctx.fireChannelRead(mapping);
+        ctx.fireChannelRead(new RequestWrapper(request, mapping));
     }
 
     public Environment getEnvironment() {
         return environment;
-    }
-
-    public static class RequestWrapper {
-        private final Request request;
-        private final MappingHolder<?> mapping;
-
-        public RequestWrapper(Request request, MappingHolder<?> mapping) {
-            this.request = request;
-            this.mapping = mapping;
-        }
-
-        public Request getRequest() {
-            return request;
-        }
-
-        public MappingHolder<?> getMapping() {
-            return mapping;
-        }
     }
 }

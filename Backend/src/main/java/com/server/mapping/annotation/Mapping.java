@@ -1,6 +1,6 @@
 package com.server.mapping.annotation;
 
-import com.server.request.RequestType;
+import com.server.request.RequestMethod;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,7 +12,7 @@ public @interface Mapping {
 
     String path() default "/";
 
-    RequestType method() default RequestType.GET;
+    RequestMethod[] method() default RequestMethod.GET;
 
     String[] parameters() default {};
 
