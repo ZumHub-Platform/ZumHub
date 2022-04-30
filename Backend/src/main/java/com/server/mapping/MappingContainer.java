@@ -21,17 +21,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MappingContainer {
 
-    private final Map<String, Mapping<?>> mappings = new ConcurrentHashMap<>();
+    private final Map<String, MappingHolder<?>> mappings = new ConcurrentHashMap<>();
 
-    public Map<String, Mapping<?>> getMappings() {
+    public Map<String, MappingHolder<?>> getMappings() {
         return mappings;
     }
 
-    public Mapping<?> findMapping(String name) {
+    public MappingHolder<?> findMapping(String name) {
         return mappings.get(name);
     }
 
-    public void addMapping(String name, Mapping<?> mapping) {
+    public void addMapping(String name, MappingHolder<?> mapping) {
         this.mappings.put(name, mapping);
     }
 

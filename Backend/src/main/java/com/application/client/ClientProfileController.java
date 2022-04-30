@@ -5,8 +5,8 @@ import com.google.common.base.Charsets;
 import com.server.mapping.annotation.Controller;
 import com.server.mapping.annotation.Mapping;
 import com.server.request.Request;
-import com.server.request.RequestType;
 import com.server.response.Response;
+import com.server.response.StringResponse;
 import org.bson.types.ObjectId;
 
 import java.util.Base64;
@@ -14,8 +14,8 @@ import java.util.Base64;
 @Controller
 public class ClientProfileController {
 
-    @Mapping(value = "/profile", method = RequestType.GET, parameters = {"identifier"})
-    public Response<String> getProfile(Request request) {
+    @Mapping(path = "/profile", parameters = {"identifier"})
+    public StringResponse getProfile(Request request) {
         String identifier = request.getParameter("identifier");
         boolean authenticated = false;
 

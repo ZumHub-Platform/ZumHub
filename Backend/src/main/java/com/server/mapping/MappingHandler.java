@@ -1,5 +1,5 @@
 /*
- * Copyright (c)  2021 Daniel Fiala
+ * Copyright (c)  2022 Daniel Fiala
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,13 @@
  * limitations under the License.
  */
 
-package com.server.request;
+package com.server.mapping;
 
-public enum RequestType {
+import com.server.request.Request;
+import com.server.response.Response;
 
-    GET(true),
-    HEAD(false),
-    POST(true),
-    PUT(false),
-    DELETE(true),
-    CONNECT(true),
-    OPTIONS(true),
-    TRACE(false),
-    PATCH(true);
+public interface MappingHandler<R> {
 
-    private final boolean bodyAllowed;
-
-    RequestType(boolean bodyAllowed) {
-        this.bodyAllowed = bodyAllowed;
-    }
-
-    public boolean hasBody() {
-        return bodyAllowed;
-    }
+    Response<R> handle(Request request);
 }
+

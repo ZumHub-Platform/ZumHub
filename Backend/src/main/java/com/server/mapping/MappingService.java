@@ -19,17 +19,19 @@ package com.server.mapping;
 import com.reflection.ClassMapper;
 import com.reflection.MethodMapper;
 import com.server.mapping.annotation.Controller;
+import com.server.mapping.annotation.Mapping;
+import com.server.mapping.annotation.SecurityPolicy;
 import com.server.request.Request;
+import com.server.request.RequestMethod;
 import com.server.response.Response;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.QueryStringDecoder;
+import com.server.response.StringResponse;
+import io.netty.util.AsciiString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public final class MappingService {
 
@@ -42,44 +44,14 @@ public final class MappingService {
         return instance;
     }
 
-    public Response<?> route(FullHttpRequest request, String url) {
-        QueryStringDecoder decoder = new QueryStringDecoder(url);
-        String route = decoder.path();
-
-        Mapping<?> mapping = container.findMapping(route);
-
-        Request req = Request.buildRequest(request);
-
-        if (mapping == null) {
-            Mapping<?> defaultMapping = container.findMapping("/");
-            if (defaultMapping == null) {
-                return Response.EMPTY_RESPONSE;
-            }
-
-            if (req.validateRequestHeaders(defaultMapping.getRequiredHeaders()) &&
-                    req.validateRequestParameters(defaultMapping.getRequiredParameters())) {
-                return defaultMapping.handle(Request.buildRequest(request));
-            } else {
-                throw new IllegalArgumentException("Request doesn't match required headers or parameters.");
-            }
-        }
-
-        if (req.validateRequestHeaders(mapping.getRequiredHeaders()) &&
-                req.validateRequestParameters(mapping.getRequiredParameters())) {
-            return mapping.handle(Request.buildRequest(request));
-        } else {
-            throw new IllegalArgumentException("Request doesn't match required headers or parameters.");
-        }
-    }
-
-    public boolean registerMapping(String path, Mapping<?> mapping) {
-        if (container.getMappings().containsKey(path)) {
+    public boolean registerMapping(MappingHolder<?> mapping) {
+        if (container.getMappings().containsKey(mapping.getPath())) {
             return false;
         }
 
-        container.addMapping(path, mapping);
+        container.addMapping(mapping.getPath(), mapping);
 
-        logger.info("Registered mapping: " + path);
+        logger.info("Registered mapping: {}", mapping.getPath());
         return true;
     }
 
@@ -90,44 +62,56 @@ public final class MappingService {
         }
 
         for (Class<?> clazz : classes) {
+            Controller controllerAnnotation = clazz.getAnnotation(Controller.class);
+            SecurityPolicy clazzSecurityPolicy = clazz.getAnnotation(SecurityPolicy.class);
+
             Method[] methods = new MethodMapper(clazz)
                     .addRequiredAnnotation(com.server.mapping.annotation.Mapping.class)
                     .addRequiredParameterType(Request.class)
-                    .setReturnType(Response.class)
+                    .setReturnType(StringResponse.class)
                     .mapMethods();
 
             for (Method method : methods) {
-                Mapping<?> mapping = new Mapping<String>() {
+                Mapping mappingAnnotation = method.getAnnotation(Mapping.class);
+                SecurityPolicy methodSecurityPolicy = method.getAnnotation(SecurityPolicy.class);
 
-                    @Override
-                    public Response<String> handle(Request request) {
-                        if (request.getRequestType() != method.getAnnotation(com.server.mapping.annotation.Mapping.class).method()) {
-                            return Response.EMPTY_RESPONSE;
-                        }
-
-                        try {
-                            Response<?> response = method.invoke(clazz.getDeclaredConstructor().newInstance(),
-                                    request) == null ?
-                                    Response.EMPTY_RESPONSE :
-                                    (Response<?>) method.invoke(clazz.getDeclaredConstructor().newInstance(), request);
-                            return (Response<String>) response;
-                        } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
-                                 NoSuchMethodException e) {
-                            throw new RuntimeException(e);
-                        }
+                MappingHandler<?> mapping = request -> {
+                    try {
+                        Response<?> response = method.invoke(clazz.getDeclaredConstructor().newInstance(),
+                                request) == null ? StringResponse.EMPTY_RESPONSE :
+                                (Response<?>) method.invoke(clazz.getDeclaredConstructor().newInstance(), request);
+                        return (Response<Object>) response;
+                    } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
+                             NoSuchMethodException e) {
+                        throw new RuntimeException(e);
                     }
                 };
 
-                mapping.setRequiredParameters(Arrays.stream(method.getAnnotation(com.server.mapping.annotation.Mapping.class).parameters())
-                        .collect(Collectors.toList()));
-                mapping.setRequiredHeaders(Arrays.stream(method.getAnnotation(com.server.mapping.annotation.Mapping.class).headers())
-                        .collect(Collectors.toList()));
+                String path = controllerAnnotation.defaultPath().length() == 0 ? mappingAnnotation.path() :
+                        controllerAnnotation.defaultPath() + mappingAnnotation.path();
 
-                registerMapping(clazz.getAnnotation(Controller.class).defaultPath().length() == 0 ?
-                        method.getAnnotation(com.server.mapping.annotation.Mapping.class).value() :
-                        clazz.getAnnotation(Controller.class).defaultPath() +
-                                method.getAnnotation(com.server.mapping.annotation.Mapping.class).value(), mapping);
+                MappingSecurity security = createMappingSecurity(clazzSecurityPolicy, methodSecurityPolicy);
+                MappingHolder<?> holder = new MappingHolder<>(path, security, mapping);
+
+                holder.setRestrictedRequestTypes(Arrays.stream(mappingAnnotation.method()).map(type -> RequestMethod.fromString(type.name())).toArray(RequestMethod[]::new));
+                holder.setRequiredParameters(Arrays.stream(mappingAnnotation.parameters()).toArray(String[]::new));
+                holder.setRequiredHeaders(Arrays.stream(mappingAnnotation.headers()).map(AsciiString::of).toArray(AsciiString[]::new));
+
+                registerMapping(holder);
             }
+        }
+    }
+
+    private MappingSecurity createMappingSecurity(SecurityPolicy clazzSecurityPolicy,
+                                                  SecurityPolicy methodSecurityPolicy) {
+        if (clazzSecurityPolicy != null && methodSecurityPolicy != null) {
+            return new MappingSecurity(clazzSecurityPolicy, methodSecurityPolicy);
+        } else if (clazzSecurityPolicy != null) {
+            return new MappingSecurity(clazzSecurityPolicy);
+        } else if (methodSecurityPolicy != null) {
+            return new MappingSecurity(methodSecurityPolicy);
+        } else {
+            return new MappingSecurity(null, false, null, null, null, 8600);
         }
     }
 
