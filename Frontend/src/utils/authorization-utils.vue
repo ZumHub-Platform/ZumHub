@@ -51,6 +51,14 @@ export default {
       functions.methods.changeText("error-message", "Invalid email.");
       functions.methods.addToClassList([container], "warning");
     },
+    invalidEmail(container) {
+      functions.methods.changeText("error-message", "This email doesn't seem to exist.");
+      functions.methods.addToClassList([container], "warning");
+    },
+    wrongPassword(container) {
+      functions.methods.changeText("error-message", "Wrong password");
+      functions.methods.addToClassList([container], "warning");
+    }
   },
 };
 </script>

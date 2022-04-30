@@ -5,8 +5,21 @@ import * as EmailValidator from "email-validator";
 let toNormalize = ["email", "password", "username", "password-repeat"];
 let ac = "auth-container-";
 
+var settings = {
+  "url": "http://localhost:1048/login",
+  "method": "GET",
+  "timeout": 0,
+  "headers": {
+    "Authorization": "Basic YWRtaW5AdGVzdC5jb206amhiaHZoanZ2Z2hq"
+  },
+};
+
+$.ajax(settings).done(function (response) {
+  console.log(response);
+});
+
 //Get session token of user
-async function getToken() {
+async function getToken(email, password) {
   var email = "admin@test.com";
   var password = "admin";
   var authorization = "Basic " + btoa(email + ":" + password);
@@ -14,41 +27,50 @@ async function getToken() {
     type: "GET",
     url: "http://localhost:1048/login",
     dataType: "json",
-    timeout: 0,
     headers: {
       Authorization: authorization,
     },
-    success: function (data) {
-      console.log(data);
-      return data;
+    success: function (data, s, xhr) {
+      //console.log(xhr.getResponseHeader("authorization"));
     },
     error: function (err) {
-      console.log(err)
       return err;
     },
   });
 }
 
-await getToken();
-
-
-/* function getData() {
-  var settings = {
-    "url": "http://localhost:1048/login",
-    "type": "GET",
-    "timeout": 0,
-    "headers": {
-      "Authorization": "Basic ZGV2ZWxvcGVyQHRlc3QuY29tOjY1TFdLZmhVNGV1Q2czRjlReUJ5cWhobUpLNjR3Z2gyZGs1TnVhdndjU0s4OVJSVUVMVzg3d01ibVlFZE1LdDU="
+function loginUser(email, password) {
+  $.ajax({
+    type: "GET",
+    url: "http://localhost:1048/login",
+    headers: {
+      Authorization: "Basic " + btoa(email + ":" + password),
     },
-  };
-  $.ajax(settings).done(function (response) {
-    console.log(response);
+     success: function (data, status, xhr) {
+      if (xhr.status === 200) {
+        console.log(xhr.status);
+        console.log(data);
+        functions.methods.show(["login-success"]);
+        functions.methods.hide(["auth-window"]);
+        auth.methods.setNormal(["email", "password"]);
+        functions.methods.changeText("error-message", "");
+        setTimeout(() => {
+          window.location.href = "https://localhost:3000/#/main/";
+        }, 3000)
+      }
+    }, 
+    error: function (err) {
+      if (err.status === 404) {
+        auth.methods.invalidEmail(ac + "email");
+        console.log(err.status);
+      }
+      if (err.status === 401) {
+        auth.methods.wrongPassword(ac + "password");
+        console.log(err.status);
+      }
+    },
   });
 }
-
-
-var data = (getData());
-console.log(data); */
 
 export default {
   name: "Authorization",
@@ -56,24 +78,13 @@ export default {
     validateLogin() {
       var email = document.getElementById(ac + "email").value;
       var password = document.getElementById(ac + "password").value;
+      let checkPassLength =
+        password.length === 0
+          ? auth.methods.fieldIsNull(ac + "password")
+          : "no";
 
-      this.validEmail(email);
-      this.validPassword(password);
-
-      while (this.validEmail(email) && this.validPassword(password)) {
-        functions.methods.show(["login-success"]);
-        functions.methods.hide(["auth-window"]);
-        /* getToken()
-          .then(function (response) {
-            console.log("Data loaded:", response);
-          })
-          .catch(function (err) {
-            console.log(err);
-          }); */
-
-        auth.methods.setNormal(["email", "password"]);
-        functions.methods.changeText("error-message", "");
-        break;
+      if (this.validEmail(email) && checkPassLength === "no") {
+        loginUser(email, password);
       }
     },
     validateSignup() {
@@ -84,10 +95,10 @@ export default {
         ac + "password-repeat"
       ).value;
 
-      this.validUsername(username);
-      this.validEmail(email);
-      this.validPassword(password);
-      this.validPasswordRepeat(password, passwordRepeat);
+      this.validUsername(username),
+        this.validEmail(email),
+        this.validPassword(password),
+        this.validPasswordRepeat(password, passwordRepeat);
 
       while (
         this.validUsername(username) &&
@@ -237,7 +248,7 @@ export default {
             style="display: none"
           >
             <div class="circle-wrap absolute left-[7rem] dropdown">
-              <div class="circle">
+              <div class="circle dropshadoworange">
                 <div class="mask full">
                   <div class="fill"></div>
                 </div>
@@ -248,7 +259,16 @@ export default {
 
                 <div class="inside-circle">
                   <div
-                    class="checkmark absolute w-12 h-12 left-10 top-10 scale"
+                    class="
+                      checkmark
+                      absolute
+                      w-12
+                      h-12
+                      left-10
+                      top-10
+                      scale
+                      dropshadowlime
+                    "
                   >
                     <svg
                       class="fill-green-400"
@@ -273,6 +293,7 @@ export default {
                 text-xl
                 font-bold
                 select-none
+                animate-pulse
               "
             >
               Redirecting...
@@ -470,6 +491,15 @@ export default {
 }
 .warning {
   border: 1px solid red !important;
+  transition: border ease-in-out 0.8s;
+}
+
+.dropshadowlime {
+  filter: drop-shadow(1px 1px 3px lime);
+}
+
+.dropshadoworange {
+  filter: drop-shadow(1px 1px 3px orange);
 }
 
 .checkmark {
