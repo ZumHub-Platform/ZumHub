@@ -29,7 +29,7 @@ export default {
     fieldIsUnderMinimum(container, minimum) {
       functions.methods.changeText(
         "error-message",
-        `This field has less than ${minimum} characters`
+        `This field must have more than ${minimum} characters`
       );
       functions.methods.addToClassList([container], "warning");
     },
@@ -37,7 +37,7 @@ export default {
     fieldIsOverMaximum(container, maximum) {
       functions.methods.changeText(
         "error-message",
-        `This field has more than ${maximum} characters`
+        `This field must have less than ${maximum} characters`
       );
       functions.methods.addToClassList([container], "warning");
     },
@@ -57,6 +57,10 @@ export default {
     },
     wrongPassword(container) {
       functions.methods.changeText("error-message", "Wrong password");
+      functions.methods.addToClassList([container], "warning");
+    },
+    userAlreadyExists(container) {
+      functions.methods.changeText("error-message", "User already exists, try another email.");
       functions.methods.addToClassList([container], "warning");
     }
   },

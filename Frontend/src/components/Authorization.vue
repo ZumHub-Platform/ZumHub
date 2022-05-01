@@ -1,72 +1,60 @@
 <script>
 import functions from "../utils/functions.vue";
 import auth from "../utils/authorization-utils.vue";
+import sha1 from "js-sha1";
 import * as EmailValidator from "email-validator";
 let toNormalize = ["email", "password", "username", "password-repeat"];
 let ac = "auth-container-";
 
-var settings = {
-  "url": "http://localhost:1048/login",
-  "method": "GET",
-  "timeout": 0,
-  "headers": {
-    "Authorization": "Basic YWRtaW5AdGVzdC5jb206amhiaHZoanZ2Z2hq"
-  },
-};
-
-$.ajax(settings).done(function (response) {
-  console.log(response);
-});
-
-//Get session token of user
-async function getToken(email, password) {
-  var email = "admin@test.com";
-  var password = "admin";
-  var authorization = "Basic " + btoa(email + ":" + password);
-  await $.ajax({
-    type: "GET",
-    url: "http://localhost:1048/login",
-    dataType: "json",
+function registerUser(username, email, password) {
+  sha1(password);
+  var hash_password = sha1.create();
+  $.ajax({
+    type: "HEAD",
+    url: "http://localhost:1048/register",
+    data: JSON.stringify(username),
     headers: {
-      Authorization: authorization,
+      Authorization: "Basic " + btoa(email + ":" + hash_password),
     },
-    success: function (data, s, xhr) {
-      //console.log(xhr.getResponseHeader("authorization"));
+    success: function (data) {
+      console.log("success", data);
     },
     error: function (err) {
-      return err;
+      if (err.status === 409) {
+        auth.methods.userAlreadyExists(ac + "email");
+      }
     },
   });
 }
-
 function loginUser(email, password) {
+  sha1(password);
+  var hash_password = sha1.create();
   $.ajax({
     type: "GET",
     url: "http://localhost:1048/login",
     headers: {
-      Authorization: "Basic " + btoa(email + ":" + password),
+      Authorization: "Basic " + btoa(email + ":" + hash_password),
     },
-     success: function (data, status, xhr) {
+    success: function (data, status, xhr) {
       if (xhr.status === 200) {
-        console.log(xhr.status);
-        console.log(data);
-        functions.methods.show(["login-success"]);
         functions.methods.hide(["auth-window"]);
-        auth.methods.setNormal(["email", "password"]);
-        functions.methods.changeText("error-message", "");
+        functions.methods.show(["login-success"]);
         setTimeout(() => {
           window.location.href = "https://localhost:3000/#/main/";
-        }, 3000)
+        }, 3000);
+        let token = xhr.getResponseHeader("Authorization");
+        sessionStorage.setItem(
+          "token",
+          token.slice(token.indexOf(" ") + 1, token.length)
+        );
       }
-    }, 
+    },
     error: function (err) {
       if (err.status === 404) {
         auth.methods.invalidEmail(ac + "email");
-        console.log(err.status);
       }
       if (err.status === 401) {
         auth.methods.wrongPassword(ac + "password");
-        console.log(err.status);
       }
     },
   });
@@ -106,6 +94,7 @@ export default {
         this.validPassword(password) &&
         this.validPasswordRepeat(password, passwordRepeat)
       ) {
+        registerUser(username, email, password);
         auth.methods.setNormal([
           "username",
           "email",
