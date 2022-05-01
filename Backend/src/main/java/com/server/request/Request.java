@@ -29,7 +29,7 @@ public class Request {
         RequestMethod requestMethod = RequestMethod.fromString(request.method().name());
         Map<String, String> headers =
                 request.headers().entries().stream().map(e -> new HashMap.SimpleEntry<>(e.getKey().toLowerCase(),
-                        e.getValue().toLowerCase())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                        e.getValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         String[] parameters = request.uri().split("\\?");
         Map<String, String> parametersMap;
         if (parameters.length > 1) {

@@ -116,7 +116,7 @@ public class AuthorizationController {
     public StringResponse clientProfileRequest(Request request) {
         String credentials =
                 new String(Base64.getDecoder().decode(request.getHeader(HttpHeaderNames.AUTHORIZATION).split(
-                "Bearer ")[1]), Charsets.UTF_8);
+                        "Bearer ")[1]), Charsets.UTF_8);
         ClientToken token = new ClientToken(null, credentials);
 
         StringResponse response = new StringResponse();
