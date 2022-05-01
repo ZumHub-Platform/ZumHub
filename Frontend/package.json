@@ -17,6 +17,7 @@
     "email-validator": "^2.0.4",
     "jquery": "^3.6.0",
     "jquery.ns-autogrow": "^1.1.1",
+    "js-sha1": "^0.6.0",
     "vue": "^3.2.33",
     "vue-router": "^4.0.14"
   },
