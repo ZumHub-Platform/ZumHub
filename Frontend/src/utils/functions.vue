@@ -58,7 +58,7 @@ export default {
           this.addToClassList([container[i]], "extend");
         }
       }
-    }
+    },
   },
 };
 </script>

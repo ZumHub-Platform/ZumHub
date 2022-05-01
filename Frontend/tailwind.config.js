@@ -7,6 +7,9 @@ module.exports = {
     extend: {
       fontFamily: {
         'raleway': ['Raleway', 'sans-serif'],
+      },
+      dropShadow: {
+        '3xl': '0 35px 35px rgba(0, 255, 0, 0.5)',
       }
     },
   },
