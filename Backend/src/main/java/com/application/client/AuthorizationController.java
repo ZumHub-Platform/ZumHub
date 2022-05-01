@@ -62,7 +62,6 @@ public class AuthorizationController {
 
                 content.setHeader(HttpHeaderNames.AUTHORIZATION,
                         "Bearer " + Base64.getEncoder().encodeToString((token.getToken()).getBytes(Charsets.UTF_8)));
-                content.setHeader(HttpHeaderNames.CACHE_CONTROL, "private, max-age=86400");
 
                 return content;
             } catch (RuntimeException e) {
