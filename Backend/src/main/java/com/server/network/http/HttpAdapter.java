@@ -1,16 +1,15 @@
 package com.server.network.http;
 
 import com.server.request.RequestWrapper;
+import com.server.response.Content;
+import com.server.response.ContentType;
 import com.server.response.Response;
 import com.server.response.StringResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 
 import java.util.Arrays;
@@ -47,5 +46,10 @@ public abstract class HttpAdapter extends ChannelInboundHandlerAdapter {
         }
 
         ctx.writeAndFlush(httpResponse);
+    }
+
+    public void writeError(ChannelHandlerContext ctx, RequestWrapper request, Exception exception) {
+        writeResponse(ctx, request, new StringResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                new Content<>("Error occurred on our server.", ContentType.TEXT_PLAIN)));
     }
 }

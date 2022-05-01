@@ -77,9 +77,7 @@ public final class MappingService {
 
                 MappingHandler<?> mapping = request -> {
                     try {
-                        Response<?> response = method.invoke(clazz.getDeclaredConstructor().newInstance(),
-                                request) == null ? StringResponse.EMPTY_RESPONSE :
-                                (Response<?>) method.invoke(clazz.getDeclaredConstructor().newInstance(), request);
+                        Object response = method.invoke(clazz.getDeclaredConstructor().newInstance(), request);
                         return (Response<Object>) response;
                     } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
                              NoSuchMethodException e) {

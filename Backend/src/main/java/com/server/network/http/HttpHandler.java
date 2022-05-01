@@ -33,7 +33,13 @@ public class HttpHandler extends HttpAdapter {
         try {
             response = request.getMapping().handle(request.getRequest());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            writeError(ctx, request, e);
+            return;
+        }
+
+        if (response == null) {
+            writeResponse(ctx, request, Response.EMPTY_RESPONSE);
+            return;
         }
 
         if (response.isCancelled()) {

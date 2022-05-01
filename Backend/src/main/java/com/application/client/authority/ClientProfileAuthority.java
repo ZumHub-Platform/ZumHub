@@ -1,6 +1,5 @@
 package com.application.client.authority;
 
-import com.application.client.ClientManager;
 import com.application.client.model.ClientProfile;
 import com.application.database.Database;
 import dev.morphia.query.Query;
@@ -26,7 +25,7 @@ public class ClientProfileAuthority {
         clientProfile.setIdentifier(id);
         clientProfile.setUsername(username);
         clientProfile.setEmail("test@test.cy");
-        clientProfile.setAvatar(ClientManager.AVATAR);
+        clientProfile.setAvatar("avatars.githubusercontent.com/u/60035933?s=40&v=4");
         clientProfile.setRegistrationDate(0);
         clientProfile.setLastLoginDate(System.currentTimeMillis());
 

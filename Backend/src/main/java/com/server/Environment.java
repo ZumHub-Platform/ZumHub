@@ -13,6 +13,10 @@ public class Environment {
     private final Properties properties = new Properties();
 
     private File homeDirectory;
+    private File configDirectory;
+    private File logDirectory;
+
+    private boolean errorLoggingEnabled;
 
     public Environment() {
     }

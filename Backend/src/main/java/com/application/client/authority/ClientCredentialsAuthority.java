@@ -57,6 +57,7 @@ public class ClientCredentialsAuthority {
                 PasswordHandler.hashPassword(password).getBytes(Charset.defaultCharset()));
         ClientCredentials clientCredentials = new ClientCredentials(clientAuthorization);
 
+        System.out.println("Registering client: " + mail);
         database.getDatabase().save(clientCredentials);
 
         ClientManager.getInstance().getClientProfileAuthority().createClientProfile(clientCredentials.getId(), mail);
@@ -64,7 +65,8 @@ public class ClientCredentialsAuthority {
     }
 
     public @Nullable ClientCredentials searchClientCredentials(@NotNull String mail) {
-        Query<ClientCredentials> query = database.getDatabase().find(ClientCredentials.class).filter(Filters.eq("mail", mail));
+        Query<ClientCredentials> query = database.getDatabase().find(ClientCredentials.class).filter(Filters.eq("mail"
+                , mail));
         return query.first();
     }
 
