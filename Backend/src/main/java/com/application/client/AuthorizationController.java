@@ -1,7 +1,6 @@
 package com.application.client;
 
 import com.application.client.data.ClientToken;
-import com.application.client.model.ClientProfile;
 import com.application.client.serialization.ObjectIdSerialization;
 import com.google.common.base.Charsets;
 import com.google.common.base.Supplier;
@@ -59,9 +58,7 @@ public class AuthorizationController {
                     return new Content<>(null, ContentType.APPLICATION_JSON);
                 }
 
-                ClientProfile profile =
-                        ClientManager.getInstance().getClientProfileAuthority().searchClientProfile(token.getId());
-                Content<String> content = new Content<>(CLIENT_PROFILE.toJson(profile), ContentType.APPLICATION_JSON);
+                Content<String> content = new Content<>(null, ContentType.APPLICATION_JSON);
 
                 content.setHeader(HttpHeaderNames.AUTHORIZATION,
                         "Bearer " + Base64.getEncoder().encodeToString((token.getToken()).getBytes(Charsets.UTF_8)));

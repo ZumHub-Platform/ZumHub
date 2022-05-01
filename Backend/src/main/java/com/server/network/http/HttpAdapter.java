@@ -32,7 +32,9 @@ public abstract class HttpAdapter extends ChannelInboundHandlerAdapter {
             return;
         }
 
+        response.getContent().getHeaders().forEach(httpResponse.headers()::set);
         httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, response.getContent().getType());
+
         if (request.getRequest().getHeader(HttpHeaderNames.ORIGIN.toString()) != null) {
             httpResponse.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN,
                     request.getRequest().getHeader(HttpHeaderNames.ORIGIN.toString()));
