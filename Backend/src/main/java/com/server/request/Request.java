@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.AsciiString;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,18 +24,21 @@ public class Request {
         this.body = body;
     }
 
-    public static Request buildRequest(FullHttpRequest request) {
+    public static Request from(FullHttpRequest request) {
         RequestMethod requestMethod = RequestMethod.fromString(request.method().name());
         Map<String, String> headers =
                 request.headers().entries().stream().map(e -> new HashMap.SimpleEntry<>(e.getKey().toLowerCase(),
                         e.getValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        String[] parameters = request.uri().split("\\?");
-        Map<String, String> parametersMap;
-        if (parameters.length > 1) {
-            parametersMap =
-                    Arrays.stream(parameters[1].split("&")).collect(Collectors.toMap(parameter -> parameter.split("=")[0], parameter -> parameter.split("=")[1]));
-        } else {
-            parametersMap = new HashMap<>(0);
+        String[] parameterPart = request.uri().split("\\?");
+        Map<String, String> parametersMap = new HashMap<>();
+        if (parameterPart.length > 1) {
+            String[] parameters = parameterPart[1].split("&");
+            for (String parameter : parameters) {
+                if (parameter.contains("=")) {
+                    String[] keyValue = parameter.split("=");
+                    parametersMap.put(keyValue[0].toLowerCase(), keyValue[1]);
+                }
+            }
         }
 
         ByteBuf body = request.content();

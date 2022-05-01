@@ -24,7 +24,7 @@ public class HttpMapper extends HttpAdapter {
             return;
         }
 
-        Request request = Request.buildRequest((FullHttpRequest) msg);
+        Request request = Request.from((FullHttpRequest) msg);
         String route = new QueryStringDecoder(((FullHttpRequest) msg).uri()).path();
 
         MappingHolder<?> mapping = MappingService.getService().getContainer().findMapping(route);
