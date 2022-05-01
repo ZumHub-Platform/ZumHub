@@ -87,7 +87,7 @@ public class AuthorizationController {
                         password)) {
                     response.setStatus(HttpResponseStatus.OK);
                 } else {
-                    response.setStatus(HttpResponseStatus.PRECONDITION_FAILED);
+                    response.setStatus(HttpResponseStatus.CONFLICT);
                 }
 
                 return new Content<>(null, ContentType.APPLICATION_JSON);

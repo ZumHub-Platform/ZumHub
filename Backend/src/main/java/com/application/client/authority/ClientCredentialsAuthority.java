@@ -57,7 +57,6 @@ public class ClientCredentialsAuthority {
                 PasswordHandler.hashPassword(password).getBytes(Charset.defaultCharset()));
         ClientCredentials clientCredentials = new ClientCredentials(clientAuthorization);
 
-        System.out.println("Registering client: " + mail);
         database.getDatabase().save(clientCredentials);
 
         ClientManager.getInstance().getClientProfileAuthority().createClientProfile(clientCredentials.getId(), mail);
