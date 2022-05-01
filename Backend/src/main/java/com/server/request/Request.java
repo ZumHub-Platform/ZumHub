@@ -80,11 +80,11 @@ public class Request {
     }
 
     public String getHeader(String header) {
-        return headers.get(header);
+        return headers.get(header.toLowerCase());
     }
 
     public String getHeader(AsciiString header) {
-        return headers.get(header.toString());
+        return headers.get(header.toString().toLowerCase());
     }
 
     public boolean hasHeader(String header) {

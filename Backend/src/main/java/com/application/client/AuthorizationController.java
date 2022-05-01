@@ -32,8 +32,9 @@ public class AuthorizationController {
     @Mapping(path = "/login")
     @SecurityPolicy(allowedMethods = "GET", allowedHeaders = "Authorization", exposedHeaders = "Authorization")
     public StringResponse clientAuthorizationRequest(Request request) {
-        String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split(
-                "Basic ")[1]), Charsets.UTF_8);
+        String credentials =
+                new String(Base64.getDecoder().decode(request.getHeader(HttpHeaderNames.AUTHORIZATION).split(
+                        "Basic ")[1]), Charsets.UTF_8);
         String mail = credentials.split(":")[0];
         String password = credentials.split(":")[1];
 
@@ -80,8 +81,9 @@ public class AuthorizationController {
     @Mapping(path = "/register", method = RequestMethod.HEAD)
     @SecurityPolicy(allowedMethods = "HEAD", allowedHeaders = "Authorization", exposedHeaders = "Authorization")
     public StringResponse clientRegisterRequest(Request request) {
-        String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split(
-                "Basic ")[1]), Charsets.UTF_8);
+        String credentials =
+                new String(Base64.getDecoder().decode(request.getHeader(HttpHeaderNames.AUTHORIZATION).split(
+                        "Basic ")[1]), Charsets.UTF_8);
         String mail = credentials.split(":")[0];
         String password = credentials.split(":")[1];
 
@@ -112,7 +114,8 @@ public class AuthorizationController {
 
     @Mapping(path = "/profile", method = RequestMethod.GET)
     public StringResponse clientProfileRequest(Request request) {
-        String credentials = new String(Base64.getDecoder().decode(request.getHeaders().get("Authorization").split(
+        String credentials =
+                new String(Base64.getDecoder().decode(request.getHeader(HttpHeaderNames.AUTHORIZATION).split(
                 "Bearer ")[1]), Charsets.UTF_8);
         ClientToken token = new ClientToken(null, credentials);
 
