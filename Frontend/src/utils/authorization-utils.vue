@@ -17,52 +17,41 @@ export default {
         functions.methods.removeFromClassList([ac + container[i]], "warning");
       }
     },
+    sendError(message, container) {
+      functions.methods.changeText("error-message", message);
+      functions.methods.addToClassList([container], "warning");
+    },
     //Adds warning to input, when it's empty
     fieldIsNull(container) {
-      functions.methods.changeText(
-        "error-message",
-        "You must fill all required fields."
-      );
-      functions.methods.addToClassList([container], "warning");
+      this.sendError("You must fill all required fields.", container);
     },
-    //Adds warning to input when it's too short
     fieldIsUnderMinimum(container, minimum) {
-      functions.methods.changeText(
-        "error-message",
-        `This field must have more than ${minimum} characters`
+      this.sendError(
+        `This field must have more than ${minimum} characters.`,
+        container
       );
-      functions.methods.addToClassList([container], "warning");
     },
-    //Adds warning to input when it's too long
     fieldIsOverMaximum(container, maximum) {
-      functions.methods.changeText(
-        "error-message",
-        `This field must have less than ${maximum} characters`
+      this.sendError(
+        `This field must have less than ${maximum} characters.`,
+        container
       );
-      functions.methods.addToClassList([container], "warning");
     },
-    //Adds warning to input when password repeat doesn't match to password and reverse
     passwordDoesntMatch(container) {
-      functions.methods.changeText("error-message", "Password doesn't match.");
-      functions.methods.addToClassList([container], "warning");
+      this.sendError("Password doesn't match.", container);
     },
-    //Adds warning to input when email has wrong syntax
     wrongEmailSyntax(container) {
-      functions.methods.changeText("error-message", "Invalid email.");
-      functions.methods.addToClassList([container], "warning");
+      this.sendError("Invalid email.", container);
     },
     invalidEmail(container) {
-      functions.methods.changeText("error-message", "This email doesn't seem to exist.");
-      functions.methods.addToClassList([container], "warning");
+      this.sendError("This email doesn't seem to exist.", container);
     },
     wrongPassword(container) {
-      functions.methods.changeText("error-message", "Wrong password");
-      functions.methods.addToClassList([container], "warning");
+      this.sendError("Wrong password.", container);
     },
     userAlreadyExists(container) {
-      functions.methods.changeText("error-message", "User already exists, try another email.");
-      functions.methods.addToClassList([container], "warning");
-    }
+      this.sendError("User already exists, try another email.", container);
+    },
   },
 };
 </script>

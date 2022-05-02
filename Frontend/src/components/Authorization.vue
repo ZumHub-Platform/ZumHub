@@ -17,7 +17,19 @@ function registerUser(username, email, password) {
       Authorization: "Basic " + btoa(email + ":" + hash_password),
     },
     success: function (data) {
-      console.log("success", data);
+      functions.methods.hide(["auth-window", "successCircle", "status"]);
+      functions.methods.show(["success-window"]);
+      functions.methods.changeText(
+        "second-status",
+        "Please check your email, for a confirmation."
+      );
+      setTimeout(() => {
+        functions.methods.show(["successCircle"]);
+      }, 200);
+      setTimeout(() => {
+        functions.methods.changeText("status", "Successfull registration");
+        functions.methods.show(["status"]);
+      }, 600);
     },
     error: function (err) {
       if (err.status === 409) {
@@ -37,16 +49,24 @@ function loginUser(email, password) {
     },
     success: function (data, status, xhr) {
       if (xhr.status === 200) {
-        functions.methods.hide(["auth-window"]);
-        functions.methods.show(["login-success"]);
+        functions.methods.hide(["auth-window", "successCircle", "status"]);
+        functions.methods.show(["success-window"]);
+        functions.methods.changeText("second-status", "Redirecting...");
         setTimeout(() => {
-          window.location.href = "https://localhost:3000/#/main/";
-        }, 3000);
+          functions.methods.show(["successCircle"]);
+        }, 200);
+        setTimeout(() => {
+          functions.methods.changeText("status", "Successfull login");
+          functions.methods.show(["status"]);
+        }, 600);
         let token = xhr.getResponseHeader("Authorization");
         sessionStorage.setItem(
           "token",
           token.slice(token.indexOf(" ") + 1, token.length)
         );
+        /*         setTimeout(() => {
+          window.location.href = "https://localhost:3000/#/main/";
+        }, 3000); */
       }
     },
     error: function (err) {
@@ -168,13 +188,9 @@ export default {
       functions.methods.changeTextAndValue("auth-button", "Login");
 
       functions.methods.hide([
-        ac + "username",
-        ac + "username-text",
-        ac + "password-repeat",
-        ac + "password-repeat-text",
+        "username-container",
+        "password-repeat-container",
       ]);
-
-      functions.methods.addToClassList([ac.slice(0, -1), ac + "window"], "add");
 
       functions.methods.changeText("error-message", "");
       auth.methods.setActive("login-button", "signup-button");
@@ -192,17 +208,14 @@ export default {
       functions.methods.resetAnimation(ac + "inputs");
       functions.methods.changeTextAndValue("auth-button", "Sign-up");
       functions.methods.show([
-        ac + "username",
-        ac + "username-text",
-        ac + "password-repeat",
-        ac + "password-repeat-text",
+        "username-container",
+        "password-repeat-container",
       ]);
 
       functions.methods.changeText("error-message", "");
       auth.methods.setActive("signup-button", "login-button");
       functions.methods.shrink([ac.slice(0, -1), ac + "window"], "remove");
       functions.methods.extend([ac.slice(0, -1), ac + "window"], "add");
-      auth.methods.setNormal(["password"]);
 
       for (var i = 0; i < finalContainers.length; i++) {
         auth.methods.setNormal([finalContainers[i]]);
@@ -226,17 +239,20 @@ export default {
           ZumHub
         </h1>
       </div>
-      <div id="auth-container" class="container mx-auto relative top-32">
+      <div id="auth-container" class="container mx-auto relative top-32 w-96">
         <div
           id="auth-container-window"
           class="bg-white rounded-2xl container w-96 mx-auto shadow-2xl"
         >
           <div
-            id="login-success"
-            class="w-96 h-96 scale bg-white"
+            id="success-window"
+            class="w-96 animate-rollDownSuccess bg-gray-50 rounded-2xl"
             style="display: none"
           >
-            <div class="circle-wrap absolute left-[7rem] dropdown">
+            <div
+              id="successCircle"
+              class="circle-wrap absolute left-[7rem] dropdown"
+            >
               <div class="circle dropshadoworange">
                 <div class="mask full">
                   <div class="fill"></div>
@@ -249,13 +265,12 @@ export default {
                 <div class="inside-circle">
                   <div
                     class="
-                      checkmark
                       absolute
                       w-12
                       h-12
                       left-10
                       top-10
-                      scale
+                      animate-scale
                       dropshadowlime
                     "
                   >
@@ -273,6 +288,21 @@ export default {
               </div>
             </div>
             <div
+              id="status"
+              class="
+                absolute
+                container
+                mx-auto
+                top-8
+                font-raleway
+                text-xl
+                font-bold
+                select-none
+                animate-fadeIn
+              "
+            ></div>
+            <div
+              id="second-status"
               class="
                 absolute
                 container
@@ -284,9 +314,7 @@ export default {
                 select-none
                 animate-pulse
               "
-            >
-              Redirecting...
-            </div>
+            ></div>
           </div>
           <div id="auth-window">
             <div id="auth-container-buttons" class="grid gap-0.5 grid-cols-2">
@@ -306,6 +334,7 @@ export default {
                     transition
                     duration-500
                     ease-out
+                    z-10
                   "
                 >
                   Login
@@ -327,6 +356,7 @@ export default {
                     transition
                     duration-500
                     ease-out
+                    z-10
                   "
                 >
                   Sign-up
@@ -343,7 +373,7 @@ export default {
                   w-96
                   top-12
                   bg-red-200
-                  scale
+                  animate-fadeIn
                 "
                 value=""
               ></div>
@@ -351,92 +381,109 @@ export default {
             <form
               id="auth-container-inputs"
               class="
-                grid
+                flex flex-col
                 gap-4
-                h-32
-                auto-cols-auto
-                mx-auto
-                relative
-                left-12
-                top-8
-                fadeInclass
+                justify-center
+                align-items-center
+                mx-12
+                mt-8
+                animate-fadeIn
               "
             >
-              <label
-                id="auth-container-username-text"
-                for="auth-container-username"
-                class="relative right-36 text-lg font-bold"
-                >Username<span style="color: red"> *</span></label
+              <div id="username-container" class="flex flex-col">
+                <label
+                  id="auth-container-username-text"
+                  for="auth-container-username"
+                  class="flex justify-start text-lg font-bold"
+                  >Username<span class="ml-1" style="color: red">*</span></label
+                >
+                <input
+                  id="auth-container-username"
+                  type="text"
+                  class="
+                    bg-slate-100
+                    w-72
+                    h-12
+                    rounded-3xl
+                    border-2
+                    text-xl
+                    indent-2.5
+                  "
+                />
+              </div>
+              <div
+                id="email-container"
+                class="flex flex-col flex-shrink-0 space-y-1"
               >
-              <input
-                id="auth-container-username"
-                type="text"
-                class="
-                  bg-slate-100
-                  w-72
-                  h-12
-                  rounded-3xl
-                  border-2
-                  text-xl
-                  indent-2.5
-                "
-              />
-              <label
-                id="auth-container-email-text"
-                for="auth-container-email"
-                class="relative right-40 text-lg font-bold"
-                >Email<span style="color: red"> *</span></label
+                <label
+                  id="auth-container-email-text"
+                  for="auth-container-email"
+                  class="flex justify-start text-lg font-bold"
+                  >Email<span class="ml-1" style="color: red">*</span></label
+                >
+                <input
+                  id="auth-container-email"
+                  type="text"
+                  class="
+                    bg-slate-100
+                    w-72
+                    h-12
+                    rounded-3xl
+                    border-2
+                    text-xl
+                    indent-2.5
+                  "
+                />
+              </div>
+              <div
+                id="password-container"
+                class="flex flex-col flex-shrink-0 space-y-1"
               >
-              <input
-                id="auth-container-email"
-                type="text"
-                class="
-                  bg-slate-100
-                  w-72
-                  h-12
-                  rounded-3xl
-                  border-2
-                  text-xl
-                  indent-2.5
-                "
-              />
-              <label
-                for="auth-container-password"
-                class="relative right-36 text-lg font-bold"
-                >Password<span style="color: red"> *</span></label
+                <label
+                  for="auth-container-password"
+                  class="flex justify-start text-lg font-bold"
+                  >Password<span class="ml-1" style="color: red">*</span></label
+                >
+                <input
+                  id="auth-container-password"
+                  type="password"
+                  class="
+                    bg-slate-100
+                    w-72
+                    h-12
+                    rounded-3xl
+                    border-2
+                    text-xl
+                    indent-2.5
+                  "
+                />
+              </div>
+              <div
+                id="password-repeat-container"
+                class="flex flex-col flex-shrink-0 space-y-1"
               >
-              <input
-                id="auth-container-password"
-                type="password"
-                class="
-                  bg-slate-100
-                  w-72
-                  h-12
-                  rounded-3xl
-                  border-2
-                  text-xl
-                  indent-2.5
-                "
-              />
-              <label
-                id="auth-container-password-repeat-text"
-                for="auth-container-password-repeat"
-                class="relative right-28 text-lg font-bold"
-                >Repeat Password<span style="color: red"> *</span></label
-              >
-              <input
-                id="auth-container-password-repeat"
-                type="password"
-                class="
-                  bg-slate-100
-                  w-72
-                  h-12
-                  rounded-3xl
-                  border-2
-                  text-xl
-                  indent-2.5
-                "
-              />
+                <label
+                  id="auth-container-password-repeat-text"
+                  for="auth-container-password-repeat"
+                  class="flex justify-start text-lg font-bold"
+                  >Repeat Password<span class="ml-1" style="color: red"
+                    >*</span
+                  ></label
+                >
+                <input
+                  id="auth-container-password-repeat"
+                  type="password"
+                  class="
+                    bg-slate-100
+                    w-72
+                    h-12
+                    rounded-3xl
+                    border-2
+                    text-xl
+                    indent-2.5
+                  "
+                />
+              </div>
             </form>
             <div
               id="confirm-button"
@@ -467,17 +514,15 @@ export default {
 
 <style>
 .extend {
-  height: 600px;
+  height: 538px;
   transition: height 0.5s ease-out;
 }
+
 .shrink {
-  height: 384px;
+  height: 350px;
   transition: height 0.5s ease-out;
 }
-.fadeInclass {
-  animation: fadeIn forwards ease-in 1s;
-  opacity: 0;
-}
+
 .warning {
   border: 1px solid red !important;
   transition: border ease-in-out 0.8s;
@@ -489,10 +534,6 @@ export default {
 
 .dropshadoworange {
   filter: drop-shadow(1px 1px 3px orange);
-}
-
-.checkmark {
-  transform: scale(0);
 }
 
 .circle-wrap {
@@ -525,6 +566,7 @@ export default {
   animation: fill ease-in-out 1s;
   transform: rotate(180deg);
 }
+
 @keyframes fill {
   0% {
     transform: rotate(0deg);
@@ -539,7 +581,7 @@ export default {
     top: 0px;
   }
   100% {
-    top: 120px;
+    top: 90px;
   }
 }
 
@@ -556,23 +598,6 @@ export default {
   z-index: 100;
   font-weight: 700;
   font-size: 2em;
-}
-
-.scale {
-  animation: scale forwards ease-out 1s;
-  transform: scale(0);
-}
-
-@keyframes fadeIn {
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes scale {
-  100% {
-    transform: scale(1);
-  }
 }
 
 #app {
